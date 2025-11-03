@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kilpirauhassyöpä - Päätöksenteon tuki</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>Papillaarinen ja follikulaarinen kilpirauhasen syöpä</h1>
+        <p class="subtitle">Interaktiivinen päätöksenteon tuki</p>
+    </header>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <!-- Section 1: Introduction -->
+                <div class="nav-section">
+                    <a href="#introduction" class="nav-item active">1. Johdanto</a>
+                </div>
+
+                <!-- Section 2: Nodule Evaluation -->
+                <div class="nav-section">
+                    <div class="nav-section-title collapsible">
+                        <span class="section-text">2. Kyhmyn arviointi</span>
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                    <div class="nav-subsection">
+                        <a href="#clinical-exam" class="nav-item nav-subitem">2.1 Kliininen tutkimus</a>
+                        <a href="#ultrasound" class="nav-item nav-subitem nav-tool">2.2 Ultraääni ⭐</a>
+                        <a href="#fna-biopsy" class="nav-item nav-subitem nav-tool">2.3 Ohutneulanäyte (FNA) ⭐</a>
+                        <a href="#bethesda" class="nav-item nav-subitem nav-tool">2.4 Bethesda-luokitus ⭐</a>
+                        <a href="#incidental-findings" class="nav-item nav-subitem nav-tool">2.5 Sattumalöydökset ⭐</a>
+                    </div>
+                </div>
+
+                <!-- Section 3: Surgical Treatment -->
+                <div class="nav-section">
+                    <div class="nav-section-title collapsible">
+                        <span class="section-text">3. Kirurginen hoito</span>
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                    <div class="nav-subsection">
+                        <a href="#surgical-planning" class="nav-item nav-subitem nav-tool">3.1 Leikkaussuunnittelu ⭐</a>
+                        <a href="#lymph-node-dissection" class="nav-item nav-subitem">3.2 Imusolmukedissektio</a>
+                        <a href="#surgical-complications" class="nav-item nav-subitem">3.3 Komplikaatiot</a>
+                        <a href="#calcium-management" class="nav-item nav-subitem">3.4 Kalsiumin hallinta</a>
+                    </div>
+                </div>
+
+                <!-- Section 4: Pathology -->
+                <div class="nav-section">
+                    <div class="nav-section-title collapsible">
+                        <span class="section-text">4. Patologia</span>
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                    <div class="nav-subsection">
+                        <a href="#pathology-report" class="nav-item nav-subitem">4.1 PAD-lausunto</a>
+                        <a href="#tnm-staging" class="nav-item nav-subitem">4.2 TNM-luokitus</a>
+                        <a href="#histological-subtypes" class="nav-item nav-subitem">4.3 Histologiset alatyypit</a>
+                    </div>
+                </div>
+
+                <!-- Section 5: Radioiodine Therapy -->
+                <div class="nav-section">
+                    <div class="nav-section-title collapsible">
+                        <span class="section-text">5. Radiojodihoito</span>
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                    <div class="nav-subsection">
+                        <a href="#risk-stratification" class="nav-item nav-subitem">5.1 Riskiluokittelu</a>
+                        <a href="#rai-indications" class="nav-item nav-subitem">5.2 Indikaatiot</a>
+                        <a href="#tsh-stimulation" class="nav-item nav-subitem">5.3 TSH-stimulaatio</a>
+                        <a href="#radiation-safety" class="nav-item nav-subitem">5.4 Säteilysuojelu</a>
+                    </div>
+                </div>
+
+                <!-- Section 6: Response Assessment & Surveillance -->
+                <div class="nav-section">
+                    <div class="nav-section-title collapsible">
+                        <span class="section-text">6. Vastearvio & Seuranta</span>
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                    <div class="nav-subsection">
+                        <a href="#response-assessment" class="nav-item nav-subitem">6.1 Vastearviointi</a>
+                        <a href="#surveillance-protocol" class="nav-item nav-subitem">6.2 Seurantaprotokolla</a>
+                        <a href="#tsh-targets" class="nav-item nav-subitem">6.3 TSH-tavoitteet</a>
+                        <a href="#imaging-surveillance" class="nav-item nav-subitem">6.4 Kuvantamisseuranta</a>
+                    </div>
+                </div>
+
+                <!-- Section 7: Recurrent & Advanced Disease -->
+                <div class="nav-section">
+                    <div class="nav-section-title collapsible">
+                        <span class="section-text">7. Uusiutunut tauti</span>
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                    <div class="nav-subsection">
+                        <a href="#repeat-surgery" class="nav-item nav-subitem">7.1 Uusintaleikkaukset</a>
+                        <a href="#repeat-rai" class="nav-item nav-subitem">7.2 Radiojodin uusinta</a>
+                        <a href="#external-radiation" class="nav-item nav-subitem">7.3 Ulkoinen sädehoito</a>
+                        <a href="#systemic-therapy" class="nav-item nav-subitem">7.4 Systeeminen hoito</a>
+                    </div>
+                </div>
+
+                <!-- Section 8: Special Topics -->
+                <div class="nav-section">
+                    <div class="nav-section-title collapsible">
+                        <span class="section-text">8. Erityisaiheet</span>
+                        <span class="collapse-icon">▼</span>
+                    </div>
+                    <div class="nav-subsection">
+                        <a href="#genetic-predisposition" class="nav-item nav-subitem">8.1 Geneettinen alttius</a>
+                        <a href="#pregnancy" class="nav-item nav-subitem">8.2 Raskaus</a>
+                        <a href="#thyroglobulin" class="nav-item nav-subitem">8.3 Tyreoglobuliini</a>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            <!-- Section 1: Introduction -->
+            <main id="introduction" class="content-section active">
+                <h2 class="section-title">Johdanto</h2>
+                <div class="info-content">
+                    <h3>Kilpirauhassyövästä lyhyesti</h3>
+                    <ul>
+                        <li>Suomessa todetaan vuosittain noin 450 uutta kilpirauhassyöpätapausta</li>
+                        <li>Näistä noin 80% on papillaarista karsinoomaa ja noin 10% follikulaarista karsinoomaa</li>
+                        <li>Sairastuneiden ennuste on yleensä erinomainen eikä matalan riskin potilaiden eloonjäämisennuste eroa muusta väestöstä</li>
+                        <li>Vuonna 2015 elossa olevia kilpirauhassyöpäpotilaita oli Suomessa 8543</li>
+                        <li>Kuolemantapaukset alle 45-vuotiailla ovat harvinaisia</li>
+                    </ul>
+
+                    <h3>Taudin luonne</h3>
+                    <ul>
+                        <li>Vaikka elinikä ennuste on pääsääntöisesti erinomainen, nähdään myös paikallisesti tai etäpesäkkeisenä esiintyvää syöpää</li>
+                        <li>Tässä laajassa tautikirjossa moniammatillinen työtapa, yhteiset hoitolinjat sekä hoidon keskittäminen kokeneisiin käsiin takaavat parhaan hoitotuloksen</li>
+                        <li>Kilpirauhassyöpä todetaan yhä useammin sattumalta muusta syystä tehdyn tutkimuksen yhteydessä</li>
+                    </ul>
+
+                    <h3>Hoito</h3>
+                    <ul>
+                        <li>Kilpirauhassyövän hoitoon kuuluu lohkon poisto tai koko kilpirauhasen poisto</li>
+                        <li>Sen jälkeen merkittävälle osalle potilaista radiojodihoito</li>
+                        <li>Suuntaus on pelkän lohkonpoistojen lisäämiseen ja radiojodihoidon kriteerien tiukentumiseen</li>
+                        <li>Etenevissä tilanteissa hoitona ovat:
+                            <ul>
+                                <li>Uusintaleikkaukset</li>
+                                <li>Toistetut radiojodihoidot</li>
+                                <li>Sädehoito</li>
+                                <li>Uudet syöpälääkkeet voivat hyödyttää monia levinnyttä papillaarista tai follikulaarista syöpää sairastavista</li>
+                            </ul>
+                        </li>
+                        <li>Mikäli koko kilpirauhanen on poistettu, tarvitaan elinikäinen tyroksiinihoito</li>
+                    </ul>
+                </div>
+            </main>
+
+            <!-- Section 2.1: Clinical Examination -->
+            <main id="clinical-exam" class="content-section">
+                <h2 class="section-title">Kliininen tutkimus</h2>
+                <div class="info-content">
+                    <h3>Kyhmy kilpirauhasessa</h3>
+                    <ul>
+                        <li>Kilpirauhasen kyhmy todetaan tunnustelemalla 3-7 % väestöstä, mutta ultraäänitutkimuksessa jopa 20-70 %</li>
+                        <li>Kilpirauhasen kyhmy on normaalista kudoksesta erottuva rakennemuutos</li>
+                        <li>Yleensä yli 15 mm kokoinen kyhmy voidaan todeta tunnustelemalla</li>
+                        <li>Klinisesti yksittäisenä havaitun kyhmyn ultraäänitutkimus löytää usein monia erillisiä kyhmyjä</li>
+                        <li>Kyhmy voi olla hyvänlaatuinen tai pahanlaatuinen kasvain, joskus syynä on tulehdus tai hyperplasia</li>
+                        <li>Nykyään kilpirauhasen kyhmy havaitaan useimmiten sattumalöydöksenä</li>
+                    </ul>
+
+                    <h3>Potilaan anamnesi</h3>
+                    <ul>
+                        <li><strong>Aiempi kaulan alueen sädehoito</strong></li>
+                        <li><strong>Sukuanamnesi:</strong>
+                            <ul>
+                                <li>Papillaarinen kilpirauhaskarsinooma useammalla kuin yhdellä lähisukulaisella</li>
+                                <li>Suvun kasvainoireyhtymät (MEN1, MEN2, Cowdenin oireyhtymä, familialinen paksusuolen polypoosi)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Kasvunopeus edeltävinä viikkoina tai lähikuukausina:</strong>
+                            <ul>
+                                <li>Nopea kasvu viittaa syöpään</li>
+                                <li>Äkillinen kivulias kyhmy viittaa kystisen kyhmyn verenvuotoon tai subakuuttiin tyreoidiittiin</li>
+                            </ul>
+                        </li>
+                        <li><strong>Oireet:</strong> Nielemisvaiva, äänen tuoton muutos tai hengenahdistus</li>
+                    </ul>
+
+                    <h3>Kliininen tutkiminen</h3>
+                    <ul>
+                        <li><strong>Kilpirauhasen palpaatio:</strong>
+                            <ul>
+                                <li>Kyhmyn koko, arkuus, kiinteys/kovuus, fiksaatio ympäristöön ja kyhmyjen lukumäärä</li>
+                                <li>Aristava kyhmy ja yleisoireet viittaavat kilpirauhasen tulehdukseen</li>
+                                <li>Kiinteä, kova, yksittäinen tai dominantti kyhmy voi olla pahanlaatuinen</li>
+                                <li>Oireeton ja pitkään samankokoisena pysynyt kyhmy ei kuitenkaan sulje pois pahanlaatuisuutta</li>
+                            </ul>
+                        </li>
+                        <li><strong>Kaulan imusolmukkeiden palpaatio:</strong>
+                            <ul>
+                                <li>Sijainti ja määrä</li>
+                            </ul>
+                        </li>
+                        <li><strong>Riskitekijät:</strong> Sukupuoli (mies) sekä ikä (&lt;14-vuotiaat ja &gt;70-vuotiaat) ovat kyhmyn pahanlaatuisuuden vaaratekijöitä</li>
+                    </ul>
+
+                    <h3>Laboratoriotutkimukset</h3>
+                    <ul>
+                        <li><strong>S-TSH:</strong>
+                            <ul>
+                                <li>Jos arvo on normaali viitevälissä, ei tarvita lisätutkimuksia</li>
+                                <li>Jos pitoisuus on suurentunut, mittaa S-T4v ja S-TPOAb hypotyreoosin luonteen arvioimiseksi</li>
+                                <li>Jos pitoisuus on pienentynyt, mittaa S-T4v ja S-T3v hypertyreosin luonteen arvioimiseksi</li>
+                            </ul>
+                        </li>
+                        <li><strong>S-Kalsitoniini:</strong>
+                            <ul>
+                                <li>Mittaa vain, jos potilaan sukuhistoriassa on medullaarinen kilpirauhaskarsinooma tai MEN2</li>
+                            </ul>
+                        </li>
+                        <li><strong>Huomio:</strong> Hypertyreoosin aiheuttava kyhmy on harvoin pahanlaatuinen, mutta laboratoriokokeet eivät poissulje pahanlaatuisuutta</li>
+                    </ul>
+
+                    <h3>Kaulan ultraäänitutkimus</h3>
+                    <ul>
+                        <li>Kaikille potilaille, joilla on todettu klinisesti kilpirauhasen kyhmy</li>
+                        <li><strong>Ultraäänitutkimuksen pyyntöön kirjattavat tiedot:</strong>
+                            <ul>
+                                <li>Potilaan ikä, sukupuoli</li>
+                                <li>Sukuanamnesi kilpirauhassyövän osalta</li>
+                                <li>Palpoituvan kyhmyn puoli</li>
+                                <li>Kilpirauhasen toiminta: eutyreosi tai toiminnan poikkeavuus</li>
+                                <li>Kyhmyyn liittyvät oireet: kipu, nielemisvaiva, äänen tuoton muutos, hengenahdistus</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3>Kilpirauhasen isotooppikuvaus</h3>
+                    <ul>
+                        <li>Ei kuulu syöpädiagnostiikkaan</li>
+                        <li>Harkitaan, jos potilaalla on kyhmyyn liittyen hypertreosi</li>
+                    </ul>
+                </div>
+            </main>
+
+            <!-- Section 2.2: Ultrasound -->
+            <main id="ultrasound" class="content-section">
+                <h2 class="section-title">Ultraääni - Maligniteettiriskin arviointi</h2>
+                <form id="ultrasoundForm">
+                    <section class="form-section">
+                        <h2>Kyhmyn ominaisuudet</h2>
+
+                        <div class="form-group">
+                            <label for="noduleSize">Kyhmyn koko (mm):</label>
+                            <input type="number" id="noduleSize" name="noduleSize" min="1" max="100" required>
+                            <span class="helper-text">Syötä kyhmyn suurin läpimitta millimetreinä</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="composition">Koostumus:</label>
+                            <select id="composition" name="composition" required>
+                                <option value="">Valitse...</option>
+                                <option value="solid">Solidi</option>
+                                <option value="cystic-solid">Kystissolidi</option>
+                                <option value="cystic">Kystinen (puhtaasti)</option>
+                                <option value="honeycomb">Hunajakennomainen</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="echogenicity">Kaikurakenne:</label>
+                            <select id="echogenicity" name="echogenicity" required>
+                                <option value="">Valitse...</option>
+                                <option value="markedly-hypo">Vahvasti niukkakaikuinen (< strap-lihas)</option>
+                                <option value="mildly-hypo">Lievästi niukkakaikuinen</option>
+                                <option value="iso">Samankaikuinen</option>
+                                <option value="hyper">Runsaskaikuinen</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h2>Ultraäänipiirteet</h2>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="usFeature" value="microcalcifications">
+                                Mikrokalkit (≤1 mm)
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="usFeature" value="macrocalcifications">
+                                Makrokalkit (kaikukatvettä aiheuttavat)
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="usFeature" value="irregular-margins">
+                                Epätarkkarajaiset reunat
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="usFeature" value="taller-than-wide">
+                                Korkeampi kuin leveämpi (AP > sivumitta)
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="usFeature" value="extrathyroidal-extension">
+                                Kasvu kilpirauhasen ulkopuolelle
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="usFeature" value="multiple-nodules">
+                                Multippelit kyhmyt (monikyhmysstruuma)
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Laske maligniteettiriskin</button>
+                        <button type="reset" class="btn-secondary">Tyhjennä</button>
+                    </div>
+                </form>
+
+                <div id="ultrasoundResult" class="result-container" style="display: none;">
+                    <h2>Maligniteettiriskin arvio</h2>
+                    <div id="ultrasoundRecommendation" class="recommendation"></div>
+                    <div id="ultrasoundRationale" class="rationale"></div>
+                    <div class="disclaimer">
+                        <strong>Huomio:</strong> Tämä on päätöksenteon tukityökalu. Lopullinen arvio tehdään yksilöllisesti kliinisen tilanteen perusteella.
+                    </div>
+                </div>
+            </main>
+
+            <!-- Section 2.3: FNA Biopsy -->
+            <main id="fna-biopsy" class="content-section">
+                <h2 class="section-title">Ohutneulanäyte (FNA) - Indikaatiot</h2>
+                <form id="fnaForm">
+                    <section class="form-section">
+                        <h2>Kyhmyn ominaisuudet</h2>
+
+                        <div class="form-group">
+                            <label for="fnaNodeSize">Kyhmyn koko (mm):</label>
+                            <input type="number" id="fnaNodeSize" name="fnaNodeSize" min="1" max="100" required>
+                            <span class="helper-text">Syötä kyhmyn suurin läpimitta millimetreinä</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fnaComposition">Koostumus:</label>
+                            <select id="fnaComposition" name="fnaComposition" required>
+                                <option value="">Valitse...</option>
+                                <option value="solid-suspicious">Solidi + malignisuspektit piirteet</option>
+                                <option value="solid-mildly-hypo">Solidi lievästi niukkakaikuinen</option>
+                                <option value="solid-iso-hyper">Solidi saman- tai runsaskaikuinen</option>
+                                <option value="cystic-solid">Kystissolidi</option>
+                                <option value="cystic">Puhtaasti kystinen</option>
+                                <option value="honeycomb">Hunajakennomainen</option>
+                            </select>
+                            <span class="helper-text">Valitse koostumus ja kaikurakenne</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="patientAge">Potilaan ikä (vuotta):</label>
+                            <input type="number" id="patientAge" name="patientAge" min="1" max="120">
+                            <span class="helper-text">Valinnainen, mutta vaikuttaa suositukseen alle 35-vuotiailla</span>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h2>Malignisuspektit piirteet ultraäänessä</h2>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="fnaFeature" value="microcalcifications">
+                                Mikrokalkit
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="fnaFeature" value="irregular-margins">
+                                Epätarkkarajaisuus
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="fnaFeature" value="extrathyroidal">
+                                Kasvu kilpirauhasen ulkopuolelle
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="fnaFeature" value="taller-than-wide">
+                                Korkeampi kuin leveämpi
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="fnaFeature" value="markedly-hypo">
+                                Vahvasti niukkakaikuinen (< strap-lihas)
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h2>Riskitekijät</h2>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="prior-cancer">
+                                Aiempi kilpirauhassyöpä
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="neck-metastases">
+                                Todetut kilpirauhassyövän kaulametastaasit
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="radiation">
+                                Aiempi pään/kaulan sädehoito lapsena/nuorena
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="men2">
+                                MEN2-syndrooma tai muu tunnettu riskisyndrooma
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="family-history">
+                                Sukuanamnesi (1. asteen sukulainen)
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Arvioi FNA-tarve</button>
+                        <button type="reset" class="btn-secondary">Tyhjennä</button>
+                    </div>
+                </form>
+
+                <div id="fnaResult" class="result-container" style="display: none;">
+                    <h2>FNA-suositus</h2>
+                    <div id="fnaRecommendation" class="recommendation"></div>
+                    <div id="fnaRationale" class="rationale"></div>
+                    <div class="disclaimer">
+                        <strong>Huomio:</strong> Tämä on päätöksenteon tukityökalu. Lopullinen päätös FNA:sta tehdään yksilöllisesti kliinisen arvion perusteella.
+                    </div>
+                </div>
+            </main>
+
+            <!-- Section 2.4: Bethesda Classification -->
+            <main id="bethesda" class="content-section">
+                <h2 class="section-title">Bethesda-luokitus - Jatkohoidon määrittely</h2>
+                <form id="bethesdaForm">
+                    <section class="form-section">
+                        <h2>Bethesda-kategoria</h2>
+
+                        <div class="form-group">
+                            <label for="bethesdaCategory">Valitse sytologinen kategoria:</label>
+                            <select id="bethesdaCategory" name="bethesdaCategory" required>
+                                <option value="">Valitse...</option>
+                                <option value="1">I - Riittämätön näyte</option>
+                                <option value="2">II - Benigni (0-3%)</option>
+                                <option value="3">III - Merkitykseltään määrittämätön atypia (5-15%)</option>
+                                <option value="4">IV - Follikulaarinen neoplasia (15-30%)</option>
+                                <option value="5">V - Epäily maligniteetista (60-75%)</option>
+                                <option value="6">VI - Maligni (97-99%)</option>
+                            </select>
+                            <span class="helper-text">Bethesda-luokituksen mukainen sytologinen diagnoosi</span>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h2>Ultraäänipiirteet</h2>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="bethesdaFeature" value="microcalcifications">
+                                Mikrokalkit
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="bethesdaFeature" value="irregular-margins">
+                                Epätarkkarajaisuus
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="bethesdaFeature" value="extrathyroidal">
+                                Kasvu kilpirauhasen ulkopuolelle
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="bethesdaFeature" value="taller-than-wide">
+                                Korkeampi kuin leveämpi
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="bethesdaFeature" value="markedly-hypo">
+                                Vahvasti niukkakaikuinen (&lt; strap-lihas)
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Määritä jatkohoito</button>
+                        <button type="button" onclick="document.getElementById('bethesdaForm').reset(); document.getElementById('bethesdaResult').style.display='none';" class="btn-secondary">Tyhjennä</button>
+                    </div>
+                </form>
+
+                <div id="bethesdaResult" class="result-container" style="display: none;">
+                    <h2>Jatkohoitosuositus</h2>
+                    <div id="bethesdaRecommendation" class="recommendation"></div>
+                    <div id="bethesdaRationale" class="rationale"></div>
+                    <div class="disclaimer">
+                        <strong>Huomio:</strong> Tämä on päätöksenteon tukityökalu. Lopullinen päätös jatkohoidosta tehdään yksilöllisesti ottaen huomioon potilaan ikä, perussairaudet ja kliininen tilanne.
+                    </div>
+                </div>
+            </main>
+
+            <!-- Section 2.5: Incidental Findings -->
+            <main id="incidental-findings" class="content-section">
+                <h2 class="section-title">Sattumalöydökset - Seurantasuositus</h2>
+                <form id="incidentalForm">
+                    <section class="form-section">
+                        <h2>Kyhmyn ominaisuudet</h2>
+
+                        <div class="form-group">
+                            <label for="incidentalSize">Kyhmyn koko (mm):</label>
+                            <input type="number" id="incidentalSize" name="incidentalSize" min="1" max="100" required>
+                            <span class="helper-text">Sattumalöydöksenä todetun kyhmyn suurin läpimitta</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="incidentalComposition">Kaikurakenne:</label>
+                            <select id="incidentalComposition" name="incidentalComposition" required>
+                                <option value="">Valitse...</option>
+                                <option value="solid-hypo-mild">Solidi lievästi niukkakaikuinen</option>
+                                <option value="solid-iso-hyper">Solidi saman- tai runsaskaikuinen</option>
+                                <option value="cystic-solid">Kystissolidi</option>
+                                <option value="cystic">Puhtaasti kystinen</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h2>Malignisuspektit piirteet</h2>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="incidentalFeature" value="microcalcifications">
+                                Mikrokalkit
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="incidentalFeature" value="irregular-margins">
+                                Epätarkkarajaisuus
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="incidentalFeature" value="extrathyroidal">
+                                Kasvu kilpirauhasen ulkopuolelle
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="incidentalFeature" value="taller-than-wide">
+                                Korkeampi kuin leveämpi
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="incidentalFeature" value="markedly-hypo">
+                                Vahvasti niukkakaikuinen (&lt; strap-lihas)
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h2>Potilaan tiedot (valinnainen)</h2>
+
+                        <div class="form-group">
+                            <label for="incidentalAge">Potilaan ikä (vuotta):</label>
+                            <input type="number" id="incidentalAge" name="incidentalAge" min="1" max="120">
+                            <span class="helper-text">Alle 35-vuotiaat kuuluvat riskiryhmään</span>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="incidentalRisk" value="risk-group">
+                                Riskiryhmä (aiempi kilpirauhassyöpä, sädehoito, MEN2, sukurasitus)
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Määritä seuranta</button>
+                        <button type="button" onclick="document.getElementById('incidentalForm').reset(); document.getElementById('incidentalResult').style.display='none';" class="btn-secondary">Tyhjennä</button>
+                    </div>
+                </form>
+
+                <div id="incidentalResult" class="result-container" style="display: none;">
+                    <h2>Seurantasuositus</h2>
+                    <div id="incidentalRecommendation" class="recommendation"></div>
+                    <div id="incidentalRationale" class="rationale"></div>
+                    <div class="disclaimer">
+                        <strong>Huomio:</strong> Tämä on päätöksenteon tukityökalu. Jatkohoidon ja seurannan tarve arvioidaan yksilöllisesti ottaen huomioon potilaan ikä, oletettavissa oleva jäljellä oleva elinikä ja perussairaudet.
+                    </div>
+                </div>
+            </main>
+
+            <!-- Section 3.1: Surgical Planning -->
+            <main id="surgical-planning" class="content-section">
+                <h2 class="section-title">Kirurginen hoito</h2>
+                <form id="treatmentForm">
+                    <section class="form-section">
+                        <h2>Kasvaimen ominaisuudet</h2>
+
+                        <div class="form-group">
+                            <label for="tumorSize">Kasvaimen koko (mm):</label>
+                            <input type="number" id="tumorSize" name="tumorSize" min="1" max="100" required>
+                            <span class="helper-text">Syötä kasvaimen suurin halkaisija millimetreinä</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tumorType">Histologinen tyyppi:</label>
+                            <select id="tumorType" name="tumorType" required>
+                                <option value="">Valitse...</option>
+                                <option value="papillary">Papillaarinen</option>
+                                <option value="follicular">Follikulaarinen</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="form-section">
+                        <h2>Riskitekijät</h2>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="extrathyroidal">
+                                Ekstrathyreoidaalinen leviäminen
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="vascular">
+                                Verisuoniinvaasio
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="lymphNode">
+                                Imusolmukevetäytyneisyys (N+)
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="braf">
+                                BRAF-mutaatio
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="aggressive">
+                                Aggressiivinen histologia (tall cell, columnar cell, hobnail)
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="familyHistory">
+                                Kilpirauhassyöpä suvussa
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="radiation">
+                                Aiempi kaulan säteilytys
+                            </label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" name="riskFactor" value="trachealContact">
+                                Kosketus henkitorveen/ruokatorveen/rekurrenshermooon
+                            </label>
+                        </div>
+                    </section>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Laske suositus</button>
+                        <button type="reset" class="btn-secondary">Tyhjennä</button>
+                    </div>
+                </form>
+
+                <div id="result" class="result-container" style="display: none;">
+                    <h2>Hoitosuositus</h2>
+                    <div id="recommendation" class="recommendation"></div>
+                    <div id="rationale" class="rationale"></div>
+                    <div class="disclaimer">
+                        <strong>Huomio:</strong> Tämä on päätöksenteon tukityökalu, joka perustuu Duodecimin käypä hoito -suositukseen.
+                        Lopullinen hoitopäätös tulee tehdä yksilöllisesti huomioiden potilaan kokonaistilanne ja toiveet.
+                    </div>
+                </div>
+            </main>
+
+            <!-- Section 3.2: Lymph Node Dissection -->
+            <main id="lymph-node-dissection" class="content-section">
+                <h2 class="section-title">Imusolmukedissektio</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 3.3: Surgical Complications -->
+            <main id="surgical-complications" class="content-section">
+                <h2 class="section-title">Kirurgiset komplikaatiot</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 3.4: Calcium Management -->
+            <main id="calcium-management" class="content-section">
+                <h2 class="section-title">Postoperatiivinen kalsiumin hallinta</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 4.1: Pathology Report -->
+            <main id="pathology-report" class="content-section">
+                <h2 class="section-title">PAD-lausunto</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 4.2: TNM Staging -->
+            <main id="tnm-staging" class="content-section">
+                <h2 class="section-title">TNM-luokitus</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 4.3: Histological Subtypes -->
+            <main id="histological-subtypes" class="content-section">
+                <h2 class="section-title">Histologiset alatyypit</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 5.1: Risk Stratification -->
+            <main id="risk-stratification" class="content-section">
+                <h2 class="section-title">Riskiluokittelu</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 5.2: RAI Indications -->
+            <main id="rai-indications" class="content-section">
+                <h2 class="section-title">Radiojodihoidon indikaatiot</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 5.3: TSH Stimulation -->
+            <main id="tsh-stimulation" class="content-section">
+                <h2 class="section-title">TSH-stimulaatio</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 5.4: Radiation Safety -->
+            <main id="radiation-safety" class="content-section">
+                <h2 class="section-title">Säteilysuojelu</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 6.1: Response Assessment -->
+            <main id="response-assessment" class="content-section">
+                <h2 class="section-title">Vastearviointi</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 6.2: Surveillance Protocol -->
+            <main id="surveillance-protocol" class="content-section">
+                <h2 class="section-title">Seurantaprotokolla</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 6.3: TSH Targets -->
+            <main id="tsh-targets" class="content-section">
+                <h2 class="section-title">TSH-tavoitteet</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 6.4: Imaging Surveillance -->
+            <main id="imaging-surveillance" class="content-section">
+                <h2 class="section-title">Kuvantamisseuranta</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 7.1: Repeat Surgery -->
+            <main id="repeat-surgery" class="content-section">
+                <h2 class="section-title">Uusintaleikkaukset</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 7.2: Repeat RAI -->
+            <main id="repeat-rai" class="content-section">
+                <h2 class="section-title">Radiojodin uusinta</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 7.3: External Radiation -->
+            <main id="external-radiation" class="content-section">
+                <h2 class="section-title">Ulkoinen sädehoito</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 7.4: Systemic Therapy -->
+            <main id="systemic-therapy" class="content-section">
+                <h2 class="section-title">Systeeminen hoito</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 8.1: Genetic Predisposition -->
+            <main id="genetic-predisposition" class="content-section">
+                <h2 class="section-title">Geneettinen alttius kilpirauhassyövälle</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 8.2: Pregnancy -->
+            <main id="pregnancy" class="content-section">
+                <h2 class="section-title">Raskaus ja kilpirauhassyöpä</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <!-- Section 8.3: Thyroglobulin -->
+            <main id="thyroglobulin" class="content-section">
+                <h2 class="section-title">Tyreoglobuliinin määritys</h2>
+                <div class="placeholder">
+                    <p>Sisältö tulossa pian...</p>
+                </div>
+            </main>
+
+            <footer>
+                <p>Perustuu Duodecimin käypä hoito -suositukseen: Papillaarinen ja follikulaarinen kilpirauhasen syöpä</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
