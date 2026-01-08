@@ -1,5 +1,5 @@
  #!/bin/bash
  
 git add .
-git commit -m "created README.md"
+git commit -m "completed content"
 git push origin main

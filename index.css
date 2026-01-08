@@ -53,6 +53,42 @@ body {
     padding: 15px 0 0 0;
 }
 
+.nav-toggle-all {
+    padding: 0 15px 10px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
+}
+
+.toggle-all-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.toggle-all-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.toggle-all-btn .toggle-icon {
+    font-size: 12px;
+}
+
+.toggle-all-btn .toggle-text {
+    font-weight: 500;
+}
+
 .nav-section {
     margin-bottom: 12px;
 }
@@ -84,6 +120,15 @@ body {
 
 .nav-section-title.collapsible:hover {
     background: rgba(0, 0, 0, 0.25);
+}
+
+.nav-item.nav-item-header {
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    background: rgba(0, 0, 0, 0.15);
+    padding: 8px 20px;
 }
 
 .section-text {
@@ -438,6 +483,75 @@ button:active {
     color: #856404;
 }
 
+/* Info and recommendation boxes */
+.info-box {
+    background: #f0f7ff;
+    border: 1px solid #b3d4fc;
+    border-left: 4px solid #095DA5;
+    border-radius: 4px;
+    padding: 15px 20px;
+    margin: 15px 0;
+}
+
+.info-box h4 {
+    color: #095DA5;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.info-box p,
+.info-box ul {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.info-box ul {
+    margin-left: 20px;
+}
+
+.info-box li {
+    margin-bottom: 5px;
+}
+
+.recommendation-box {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #ff9800;
+    border-radius: 4px;
+    padding: 15px 20px;
+    margin: 15px 0;
+}
+
+.recommendation-box h4 {
+    color: #e65100;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.recommendation-box ul {
+    margin: 0;
+    margin-left: 20px;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.recommendation-box li {
+    margin-bottom: 5px;
+}
+
+.recommendation-box.recommendation-korkea {
+    border-left-color: #d32f2f;
+}
+
+.recommendation-box.recommendation-korkea h4 {
+    color: #c62828;
+}
+
 /* Footer */
 footer {
     background: #f8f9fa;
@@ -446,6 +560,108 @@ footer {
     font-size: 12px;
     color: #666;
     border-top: 1px solid #e0e0e0;
+}
+
+/* PAD Table styles */
+.pad-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 14px;
+}
+
+.pad-table th,
+.pad-table td {
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+    text-align: left;
+}
+
+.pad-table th {
+    background: #095DA5;
+    color: white;
+    font-weight: 600;
+}
+
+.pad-table tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+.pad-table tr:hover {
+    background: #f0f7ff;
+}
+
+/* Info content h4 styling */
+.info-content h4 {
+    color: #333;
+    margin-bottom: 8px;
+    margin-top: 16px;
+    font-size: 15px;
+}
+
+/* Source card styling */
+.source-card {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #095DA5;
+    border-radius: 4px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.source-card h4 {
+    color: #095DA5;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.source-meta {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.article-meta {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.article-meta li {
+    padding: 4px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.authors-list {
+    line-height: 1.8;
+    color: #555;
+    font-size: 14px;
+}
+
+.copyright {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+}
+
+.references-list {
+    margin-left: 25px;
+    padding-left: 0;
+}
+
+.references-list li {
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #555;
+}
+
+.placeholder-text {
+    color: #888;
+    font-style: italic;
 }
 
 /* Responsive design */
@@ -504,6 +720,19 @@ footer {
 
     .nav-section-title.collapsible.expanded + .nav-subsection {
         max-height: 400px;
+    }
+
+    .nav-toggle-all {
+        padding: 0 10px 8px 10px;
+    }
+
+    .toggle-all-btn {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+
+    .references-list li {
+        font-size: 12px;
     }
 }
 

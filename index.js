@@ -9,6 +9,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Toggle all sections button
+    const toggleAllBtn = document.getElementById('toggleAllSections');
+    if (toggleAllBtn) {
+        let allExpanded = false;
+
+        toggleAllBtn.addEventListener('click', function() {
+            allExpanded = !allExpanded;
+            const toggleIcon = this.querySelector('.toggle-icon');
+            const toggleText = this.querySelector('.toggle-text');
+
+            collapsibles.forEach(collapsible => {
+                if (allExpanded) {
+                    collapsible.classList.add('expanded');
+                } else {
+                    collapsible.classList.remove('expanded');
+                }
+            });
+
+            if (allExpanded) {
+                toggleIcon.textContent = '⊟';
+                toggleText.textContent = 'Sulje kaikki';
+            } else {
+                toggleIcon.textContent = '⊞';
+                toggleText.textContent = 'Avaa kaikki';
+            }
+        });
+    }
+
     // Navigation handling
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content-section');
@@ -1097,5 +1125,1694 @@ document.addEventListener('DOMContentLoaded', function() {
             'markedly-hypo': 'Vahvasti niukkakaikuinen'
         };
         return labels[value] || value;
+    }
+
+    // Calcium management form handling
+    const calciumForm = document.getElementById('calciumForm');
+    const calciumResultContainer = document.getElementById('calciumResult');
+    const calciumRecommendationDiv = document.getElementById('calciumRecommendation');
+    const calciumRationaleDiv = document.getElementById('calciumRationale');
+
+    if (calciumForm) {
+        calciumForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const calcium = parseFloat(document.getElementById('calciumLevel').value);
+            const pthInput = document.getElementById('pthLevel').value;
+            const pth = pthInput ? parseFloat(pthInput) : null;
+
+            const result = determineCalciumManagement(calcium, pth);
+            displayCalciumResult(result, calcium, pth);
+        });
+    }
+
+    function determineCalciumManagement(calcium, pth) {
+        let recommendation = '';
+        let dosing = '';
+        let followUp = '';
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        // Severe hypocalcemia - do not discharge
+        if (calcium < 1.05) {
+            recommendation = 'Ei kotiutusta - aloita aktiivinen D-vitamiini';
+            dosing = 'Kalsium-D-vitamiini 2×2 + Alfakalsidoli 0.5 µg × 2';
+            followUp = 'Ionisoitunut kalsium joka aamu. Kotiutus vasta kun Ca++ ≥ 1.05 mmol/l';
+            reasoning.push('Vaikea hypokalsemia (Ca++ < 1.05 mmol/l)');
+            reasoning.push('Potilasta ei saa kotiuttaa');
+            reasoning.push('Alfakalsidoli aloitetaan kalsium-D-vitamiinin rinnalle');
+            if (pth !== null && pth < 0.58) {
+                reasoning.push('PTH erittäin matala - pysyvän hypoparatyreoosin riski kohonnut');
+            }
+            reasoning.push('Vaikean hypokalsemian yhteydessä voidaan tarvita kalsiuminfuusiota');
+            riskLevel = 'high-risk';
+        }
+        // Mild hypocalcemia
+        else if (calcium >= 1.05 && calcium <= 1.15) {
+            recommendation = 'Kalsium-D-vitamiinikorvaus, seuranta erikoissairaanhoidossa';
+            dosing = 'Kalsium-D-vitamiini 2×2';
+            followUp = 'Ohjaus endokrinologian poliklinikalle 1-3 viikon sisällä';
+            reasoning.push('Lievä hypokalsemia (Ca++ 1.05-1.15 mmol/l)');
+            reasoning.push('Kotiutus mahdollinen kalsiumlisällä');
+            if (pth !== null) {
+                if (pth < 0.58) {
+                    reasoning.push('PTH matala - harkitse alfakalsidolin aloitusta');
+                    riskLevel = 'warning';
+                } else if (pth > 1.06) {
+                    reasoning.push('PTH normaali - lisäkilpirauhasen toiminta todennäköisesti palautuu');
+                }
+            }
+            riskLevel = 'warning';
+        }
+        // Low-normal calcium
+        else if (calcium > 1.15 && calcium <= 1.30) {
+            recommendation = 'Profylaktinen kalsium-D-vitamiinivalmiste';
+            dosing = 'Kalsium-D-vitamiini 1×1-2';
+            followUp = 'Kontrolli omalla terveysasemalla 1-2 kk kuluttua';
+            reasoning.push('Kalsium viitealueen alarajalla (Ca++ 1.16-1.30 mmol/l)');
+            reasoning.push('Profylaktinen korvaus suositeltava');
+            if (pth !== null && pth > 1.06) {
+                reasoning.push('PTH normaali - hyvä ennuste lisäkilpirauhasen toiminnalle');
+            }
+            riskLevel = 'low-risk';
+        }
+        // Normal calcium
+        else {
+            recommendation = 'Ei kalsiumlisää tarvita';
+            dosing = 'Ei lääkitystä';
+            followUp = 'Normaali seuranta';
+            reasoning.push('Kalsium normaali (Ca++ > 1.30 mmol/l)');
+            reasoning.push('Ei tarvetta kalsiumkorvaukselle');
+            if (pth !== null && pth > 1.06) {
+                reasoning.push('PTH normaali - lisäkilpirauhasen toiminta säilynyt');
+            }
+            riskLevel = 'benign';
+        }
+
+        // PTH-specific warnings
+        if (pth !== null) {
+            if (pth < 0.58 && calcium >= 1.05) {
+                reasoning.push('HUOM: Matala PTH viittaa hypoparatyreoosiriskiin - tihennetty seuranta');
+            }
+        }
+
+        return {
+            recommendation: recommendation,
+            dosing: dosing,
+            followUp: followUp,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayCalciumResult(result, calcium, pth) {
+        calciumRecommendationDiv.textContent = result.recommendation;
+        calciumRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Hoito-ohje:</h3>';
+        rationaleHTML += '<p><strong>Ca++ (ionisoutunut):</strong> ' + calcium.toFixed(2) + ' mmol/l</p>';
+        if (pth !== null) {
+            rationaleHTML += '<p><strong>PTH:</strong> ' + pth.toFixed(2) + ' pmol/l</p>';
+        }
+        rationaleHTML += '<p><strong>Lääkitys:</strong> ' + result.dosing + '</p>';
+        rationaleHTML += '<p><strong>Seuranta:</strong> ' + result.followUp + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        rationaleHTML += '<p><strong>Lääkevaihtoehtoja:</strong></p><ul>';
+        rationaleHTML += '<li>Kalsium-D-vitamiinivalmisteet: Ideos®, Kalcipos®, Calci-Chew D3 Forte®, Minisun Calcium®</li>';
+        rationaleHTML += '<li>Aktiivinen D-vitamiini: Alfakalsidoli (Etalpha® tai geneerinen)</li>';
+        rationaleHTML += '</ul>';
+
+        rationaleHTML += '<p><strong>Muistettavaa:</strong></p><ul>';
+        rationaleHTML += '<li>Tyroksiini tulee ottaa vähintään 4 tuntia ennen kalsiumvalmistetta</li>';
+        if (result.riskLevel === 'high-risk') {
+            rationaleHTML += '<li>Mittaa myös plasman magnesiumpitoisuus vaikean hypokalsemian yhteydessä</li>';
+        }
+        rationaleHTML += '</ul>';
+
+        calciumRationaleDiv.innerHTML = rationaleHTML;
+        calciumResultContainer.style.display = 'block';
+        calciumResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // TNM Staging form handling
+    const tnmForm = document.getElementById('tnmForm');
+    const tnmResultContainer = document.getElementById('tnmResult');
+    const tnmRecommendationDiv = document.getElementById('tnmRecommendation');
+    const tnmRationaleDiv = document.getElementById('tnmRationale');
+
+    if (tnmForm) {
+        tnmForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const age = parseInt(document.getElementById('tnmAge').value);
+            const tClass = document.getElementById('tClass').value;
+            const nClass = document.getElementById('nClass').value;
+            const mClass = document.getElementById('mClass').value;
+
+            const result = determineTNMStage(age, tClass, nClass, mClass);
+            displayTNMResult(result, age, tClass, nClass, mClass);
+        });
+    }
+
+    function determineTNMStage(age, t, n, m) {
+        let stage = '';
+        let stageDescription = '';
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        const isYoung = age < 55;
+        const hasMetastasis = m === 'M1';
+        const hasLymphNode = n === 'N1a' || n === 'N1b';
+
+        // T category parsing
+        const isT1 = t === 'T1a' || t === 'T1b';
+        const isT2 = t === 'T2';
+        const isT3 = t === 'T3a' || t === 'T3b';
+        const isT4a = t === 'T4a';
+        const isT4b = t === 'T4b';
+
+        if (isYoung) {
+            // Age < 55 years - only Stage I or II
+            if (hasMetastasis) {
+                stage = 'II';
+                stageDescription = 'Levinneisyysaste II (ikä <55v, M1)';
+                reasoning.push('Potilas alle 55-vuotias');
+                reasoning.push('Etäpesäkkeitä todettu (M1)');
+                reasoning.push('Alle 55-vuotiailla vain asteet I ja II');
+                riskLevel = 'warning';
+            } else {
+                stage = 'I';
+                stageDescription = 'Levinneisyysaste I (ikä <55v, M0)';
+                reasoning.push('Potilas alle 55-vuotias');
+                reasoning.push('Ei etäpesäkkeitä (M0)');
+                reasoning.push('Alle 55-vuotiailla ilman etäpesäkkeitä aina aste I');
+                reasoning.push('Ennuste erinomainen iästä riippumatta T- tai N-luokasta');
+                riskLevel = 'benign';
+            }
+        } else {
+            // Age >= 55 years
+            if (hasMetastasis) {
+                stage = 'IVB';
+                stageDescription = 'Levinneisyysaste IVB (ikä ≥55v, M1)';
+                reasoning.push('Potilas 55-vuotias tai vanhempi');
+                reasoning.push('Etäpesäkkeitä todettu (M1)');
+                riskLevel = 'high-risk';
+            } else if (isT4b) {
+                stage = 'IVA';
+                stageDescription = 'Levinneisyysaste IVA (ikä ≥55v, T4b)';
+                reasoning.push('Potilas 55-vuotias tai vanhempi');
+                reasoning.push('Laaja paikallinen leviäminen (T4b)');
+                reasoning.push('Kasvu prevertebraalifaskiaan, carotis-valtimon ympäri tai mediastinaalisiin suoniin');
+                riskLevel = 'high-risk';
+            } else if (isT4a) {
+                stage = 'III';
+                stageDescription = 'Levinneisyysaste III (ikä ≥55v, T4a)';
+                reasoning.push('Potilas 55-vuotias tai vanhempi');
+                reasoning.push('Paikallisesti edennyt tauti (T4a)');
+                reasoning.push('Kasvu ihonalaisiin pehmytkudoksiin, kurkunpäähän, henkitorveen, ruokatorveen tai recurrens-hermoon');
+                riskLevel = 'high-risk';
+            } else if (isT3 || hasLymphNode) {
+                stage = 'II';
+                stageDescription = 'Levinneisyysaste II (ikä ≥55v)';
+                reasoning.push('Potilas 55-vuotias tai vanhempi');
+                if (isT3) reasoning.push('Suuri kasvain (T3: >4 cm) tai kasvu ympäröiviin lihaksiin');
+                if (hasLymphNode) reasoning.push('Imusolmukemetastaaseja todettu (' + n + ')');
+                riskLevel = 'warning';
+            } else {
+                stage = 'I';
+                stageDescription = 'Levinneisyysaste I (ikä ≥55v, T1-2 N0)';
+                reasoning.push('Potilas 55-vuotias tai vanhempi');
+                reasoning.push('Pieni/keskikokoinen kasvain (≤4 cm)');
+                reasoning.push('Ei imusolmukemetastaaseja');
+                reasoning.push('Ei etäpesäkkeitä');
+                riskLevel = 'benign';
+            }
+        }
+
+        return {
+            stage: stage,
+            stageDescription: stageDescription,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayTNMResult(result, age, t, n, m) {
+        tnmRecommendationDiv.textContent = result.stageDescription;
+        tnmRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>TNM-luokitus:</h3>';
+        rationaleHTML += '<p><strong>Ikä:</strong> ' + age + ' vuotta';
+        if (age < 55) {
+            rationaleHTML += ' (alle 55-vuotias)';
+        } else {
+            rationaleHTML += ' (55-vuotias tai vanhempi)';
+        }
+        rationaleHTML += '</p>';
+        rationaleHTML += '<p><strong>T-luokka:</strong> ' + t + '</p>';
+        rationaleHTML += '<p><strong>N-luokka:</strong> ' + n + '</p>';
+        rationaleHTML += '<p><strong>M-luokka:</strong> ' + m + '</p>';
+        rationaleHTML += '<p><strong>Levinneisyysaste:</strong> ' + result.stage + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        rationaleHTML += '<p><strong>Ennuste ja hoito:</strong></p><ul>';
+        if (result.stage === 'I') {
+            rationaleHTML += '<li>Erinomainen ennuste</li>';
+            rationaleHTML += '<li>5-vuotiselossaoloennuste >98%</li>';
+        } else if (result.stage === 'II') {
+            rationaleHTML += '<li>Hyvä ennuste</li>';
+            rationaleHTML += '<li>Tihennetty seuranta suositeltava</li>';
+        } else if (result.stage === 'III' || result.stage === 'IVA') {
+            rationaleHTML += '<li>Kohtalainen ennuste</li>';
+            rationaleHTML += '<li>Moniammatillinen arvio suositeltava</li>';
+            rationaleHTML += '<li>Radiojodihoito todennäköisesti aiheellinen</li>';
+        } else if (result.stage === 'IVB') {
+            rationaleHTML += '<li>Vaativa tilanne - moniammatillinen arvio välttämätön</li>';
+            rationaleHTML += '<li>Hoitovaste riippuu etäpesäkkeiden radiojodiherkyydestä</li>';
+        }
+        rationaleHTML += '</ul>';
+
+        tnmRationaleDiv.innerHTML = rationaleHTML;
+        tnmResultContainer.style.display = 'block';
+        tnmResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Risk Stratification form handling
+    const riskForm = document.getElementById('riskForm');
+    const riskResultContainer = document.getElementById('riskResult');
+    const riskRecommendationDiv = document.getElementById('riskRecommendation');
+    const riskRationaleDiv = document.getElementById('riskRationale');
+
+    if (riskForm) {
+        riskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const tumorSize = parseInt(document.getElementById('riskTumorSize').value);
+            const features = Array.from(document.querySelectorAll('input[name="riskFeature"]:checked'))
+                .map(cb => cb.value);
+
+            const result = determineRiskCategory(tumorSize, features);
+            displayRiskResult(result, tumorSize, features);
+        });
+    }
+
+    function determineRiskCategory(tumorSize, features) {
+        let riskCategory = 'low';
+        let riskDescription = '';
+        let raiRecommendation = '';
+        let raiDose = '';
+        let reasoning = [];
+        let highRiskFeatures = [];
+        let intermediateRiskFeatures = [];
+
+        // Define high-risk features
+        const highRisk = ['macroMargin', 'macroExtrathyroidal', 'vascular4plus', 'widelyInvasive',
+                         'poorlyDiff', 'largeMeta', 'extracapsular', 'distantMeta'];
+
+        // Define intermediate-risk features
+        const intermediateRisk = ['extrathyroidal', 'vascular13', 'aggressive', 'braf2cm',
+                                  'macroMeta', 'microMeta5'];
+
+        // Check for high-risk features
+        features.forEach(f => {
+            if (highRisk.includes(f)) {
+                highRiskFeatures.push(f);
+            } else if (intermediateRisk.includes(f)) {
+                intermediateRiskFeatures.push(f);
+            }
+        });
+
+        // Large tumor is intermediate risk
+        if (tumorSize > 40) {
+            intermediateRiskFeatures.push('largeTumor');
+        }
+
+        // Determine risk category
+        if (highRiskFeatures.length > 0) {
+            riskCategory = 'high';
+            riskDescription = 'KORKEA RISKI (uusimisriski >30%)';
+            raiRecommendation = 'Radiojodihoito suositeltava';
+            raiDose = '3.7 GBq';
+            reasoning.push('Korkean riskin piirteitä todettu');
+        } else if (intermediateRiskFeatures.length > 0) {
+            riskCategory = 'intermediate';
+            riskDescription = 'KOHTALAINEN RISKI (uusimisriski 6-30%)';
+            raiRecommendation = 'Radiojodihoito suositeltava';
+            raiDose = '3.7 GBq';
+            reasoning.push('Kohtalaisen riskin piirteitä todettu');
+        } else {
+            riskCategory = 'low';
+            riskDescription = 'MATALA RISKI (uusimisriski <6%)';
+            if (tumorSize < 10) {
+                raiRecommendation = 'Radiojodihoitoa ei tarvita';
+                raiDose = 'Ei hoitoa';
+                reasoning.push('<1 cm matalan riskin kasvain ei vaadi radiojodihoitoa');
+            } else {
+                raiRecommendation = 'Radiojodihoito yleensä ei tarvita, seuranta riittää';
+                raiDose = 'Tarvittaessa 1.1 GBq';
+                reasoning.push('1-4 cm matalan riskin kasvaimissa radiojodin voi jättää antamatta');
+                reasoning.push('Edellytykset: tyreoglobuliini <0.2 µg/l ja vasta-ainetaso normaali');
+            }
+        }
+
+        // Add specific feature reasons
+        const featureLabels = {
+            'macroMargin': 'Makroskooppinen marginaalipositiivisuus',
+            'macroExtrathyroidal': 'Makroskooppinen kasvu kilpirauhasen ulkopuolelle',
+            'vascular4plus': 'Verisuoni-invaasio ≥4 suonessa',
+            'widelyInvasive': 'Laajasti invasiivinen karsinooma',
+            'poorlyDiff': 'Huonosti erilaistunut karsinooma',
+            'largeMeta': 'Suuri (>30 mm) imusolmukemetastaasi',
+            'extracapsular': 'Ekstrakapsulaarinen kasvu imusolmukkeessa',
+            'distantMeta': 'Etäpesäkkeet',
+            'extrathyroidal': 'Mikroskooppinen kasvu kilpirauhasen ulkopuolelle',
+            'vascular13': 'Verisuoni-invaasio (1-3 suonessa)',
+            'aggressive': 'Aggressiivinen histologia ≥1 cm kasvaimessa',
+            'braf2cm': 'BRAF V600E -mutaatio ≥2 cm kasvaimessa',
+            'macroMeta': 'Makrometastaasi imusolmukkeessa',
+            'microMeta5': 'Mikrometastaaseja ≥5 imusolmukkeessa',
+            'largeTumor': 'Kasvain >4 cm'
+        };
+
+        highRiskFeatures.forEach(f => {
+            reasoning.push('Korkean riskin piirre: ' + featureLabels[f]);
+        });
+
+        intermediateRiskFeatures.forEach(f => {
+            reasoning.push('Kohtalaisen riskin piirre: ' + featureLabels[f]);
+        });
+
+        return {
+            riskCategory: riskCategory,
+            riskDescription: riskDescription,
+            raiRecommendation: raiRecommendation,
+            raiDose: raiDose,
+            reasoning: reasoning,
+            highRiskFeatures: highRiskFeatures,
+            intermediateRiskFeatures: intermediateRiskFeatures
+        };
+    }
+
+    function displayRiskResult(result, tumorSize, features) {
+        riskRecommendationDiv.textContent = result.riskDescription;
+
+        if (result.riskCategory === 'high') {
+            riskRecommendationDiv.className = 'recommendation high-risk';
+        } else if (result.riskCategory === 'intermediate') {
+            riskRecommendationDiv.className = 'recommendation warning';
+        } else {
+            riskRecommendationDiv.className = 'recommendation benign';
+        }
+
+        let rationaleHTML = '<h3>Arviointi:</h3>';
+        rationaleHTML += '<p><strong>Kasvaimen koko:</strong> ' + tumorSize + ' mm</p>';
+        rationaleHTML += '<p><strong>Riskiluokka:</strong> ' + result.riskDescription + '</p>';
+        rationaleHTML += '<p><strong>Radiojodihoitosuositus:</strong> ' + result.raiRecommendation + '</p>';
+        rationaleHTML += '<p><strong>Radiojodiannos:</strong> ' + result.raiDose + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        // Add treatment considerations
+        rationaleHTML += '<p><strong>Hoitosuunnittelussa huomioitavaa:</strong></p><ul>';
+        if (result.riskCategory === 'high') {
+            rationaleHTML += '<li>Radiojodihoito 3.7 GBq suositeltava vasta-aiheiden puuttuessa</li>';
+            rationaleHTML += '<li>TSH-stimulaatio rhTSH-valmisteella tai tyroksiinitauolla</li>';
+            rationaleHTML += '<li>Vähäjodinen ruokavalio 2 viikkoa ennen hoitoa</li>';
+            if (features.includes('poorlyDiff')) {
+                rationaleHTML += '<li>HUOM: Huonosti erilaistuneet karsinoomat reagoivat usein huonommin radiojodiin - ulkoisen sädehoidon tarve arvioitava</li>';
+            }
+        } else if (result.riskCategory === 'intermediate') {
+            rationaleHTML += '<li>Radiojodihoito 3.7 GBq lähtökohtaisesti suositeltava</li>';
+            rationaleHTML += '<li>Poikkeustapauksissa seuranta mahdollinen, jos tyreoglobuliini stabiili <2 µg/l</li>';
+            rationaleHTML += '<li>TSH-stimulaatio suositeltava rhTSH-valmisteella</li>';
+        } else {
+            rationaleHTML += '<li>Postoperatiivinen tyreoglobuliini tarkistettava (tavoite <0.2 µg/l)</li>';
+            rationaleHTML += '<li>Tyreoglobuliinivasta-aineet tarkistettava</li>';
+            rationaleHTML += '<li>Jos Tg 0.2-2 µg/l: kontrolli 2 kk kuluttua</li>';
+            rationaleHTML += '<li>Jos Tg >2 µg/l tai vasta-aineet koholla: harkitse radiojodia 1.1 GBq</li>';
+        }
+        rationaleHTML += '</ul>';
+
+        riskRationaleDiv.innerHTML = rationaleHTML;
+        riskResultContainer.style.display = 'block';
+        riskResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Response Assessment form handling (6.1)
+    const responseForm = document.getElementById('responseForm');
+    const responseResultContainer = document.getElementById('responseResult');
+    const responseRecommendationDiv = document.getElementById('responseRecommendation');
+    const responseRationaleDiv = document.getElementById('responseRationale');
+
+    if (responseForm) {
+        responseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const hadRAI = document.querySelector('input[name="hadRAI"]:checked').value;
+            const suppressedTg = parseFloat(document.getElementById('suppressedTg').value);
+            const stimulatedTgInput = document.getElementById('stimulatedTg').value;
+            const stimulatedTg = stimulatedTgInput ? parseFloat(stimulatedTgInput) : null;
+            const tgAb = document.querySelector('input[name="tgAb"]:checked').value;
+            const ultrasound = document.querySelector('input[name="ultrasound"]:checked').value;
+
+            const result = determineResponseCategory(hadRAI, suppressedTg, stimulatedTg, tgAb, ultrasound);
+            displayResponseResult(result, suppressedTg, stimulatedTg, tgAb, ultrasound);
+        });
+
+        responseForm.addEventListener('reset', function() {
+            responseResultContainer.style.display = 'none';
+        });
+    }
+
+    function determineResponseCategory(hadRAI, suppressedTg, stimulatedTg, tgAb, ultrasound) {
+        let category = '';
+        let recommendation = '';
+        let riskLevel = 'low-risk';
+        let reasoning = [];
+
+        // Structural disease takes priority
+        if (ultrasound === 'positive') {
+            category = 'Mitattavaa tautia jäljellä';
+            recommendation = 'Yksilöllinen hoitosuunnitelma (kirurgia, RAI, sädehoito, lääkehoito)';
+            riskLevel = 'high-risk';
+            reasoning.push('Kuvantamisessa selvä tauti');
+            reasoning.push('Hoito suunnitellaan moniammatillisesti');
+        }
+        // Rising TgAb is concerning
+        else if (tgAb === 'rising') {
+            category = 'Biokemiallinen epätäydellinen vaste';
+            recommendation = 'Uusinta radiojodihoito yleensä perusteltu';
+            riskLevel = 'high-risk';
+            reasoning.push('TgAb nousussa viittaa aktiiviseen tautiin');
+            reasoning.push('Nouseva TgAb on indikaatio radiojodihoidolle');
+        }
+        // Check Tg levels based on RAI status
+        else if (hadRAI === 'yes') {
+            // Post-RAI assessment
+            if (ultrasound === 'normal' && tgAb === 'negative') {
+                if (suppressedTg < 0.2 && (stimulatedTg === null || stimulatedTg < 1)) {
+                    category = 'Erinomainen vaste';
+                    recommendation = 'Seuranta, ei uusintahoitoja. Uusimisriski <2%';
+                    riskLevel = 'benign';
+                    reasoning.push('UÄ normaali, Tg matala, TgAb negatiivinen');
+                } else if (suppressedTg <= 1 || (stimulatedTg !== null && stimulatedTg <= 10)) {
+                    category = 'Epävarma tilanne';
+                    recommendation = 'Ei uusintahoitoa, mutta tiivis seuranta';
+                    riskLevel = 'warning';
+                    reasoning.push('Tg-taso epävarmalla alueella');
+                } else {
+                    category = 'Biokemiallinen epätäydellinen vaste';
+                    recommendation = 'Uusinta radiojodihoito yleensä perusteltu';
+                    riskLevel = 'high-risk';
+                    reasoning.push('Kohonnut Tg viittaa jäljellä olevaan tautiin');
+                }
+            } else if (ultrasound === 'suspicious' || tgAb === 'stable') {
+                category = 'Epävarma tilanne';
+                recommendation = 'Tiivis seuranta, ei välttämättä uusintahoitoa';
+                riskLevel = 'warning';
+                if (ultrasound === 'suspicious') reasoning.push('Epäilyttävä UÄ-löydös');
+                if (tgAb === 'stable') reasoning.push('TgAb koholla mutta stabiili/laskeva');
+            } else {
+                category = 'Biokemiallinen epätäydellinen vaste';
+                recommendation = 'Uusinta radiojodihoito harkittava';
+                riskLevel = 'high-risk';
+                reasoning.push('Kohonnut Tg ilman normaalia UÄ-löydöstä');
+            }
+        } else {
+            // No prior RAI
+            if (ultrasound === 'normal' && suppressedTg < 0.2 && tgAb === 'negative') {
+                category = 'Erinomainen vaste';
+                recommendation = 'Seuranta riittää';
+                riskLevel = 'benign';
+                reasoning.push('Matala riski ilman radiojodihoitoa');
+            } else if (suppressedTg <= 2) {
+                category = 'Epävarma tilanne';
+                recommendation = 'Kontrolli 6-12 kk, harkitse RAI:ta';
+                riskLevel = 'warning';
+                reasoning.push('Tg 0.2-2 µg/l tai TgAb koholla');
+            } else {
+                category = 'Biokemiallinen epätäydellinen vaste';
+                recommendation = 'Radiojodihoito 1.1 GBq suositeltava';
+                riskLevel = 'high-risk';
+                reasoning.push('Tg >2 µg/l tai nousussa');
+            }
+        }
+
+        return {
+            category: category,
+            recommendation: recommendation,
+            riskLevel: riskLevel,
+            reasoning: reasoning
+        };
+    }
+
+    function displayResponseResult(result, suppressedTg, stimulatedTg, tgAb, ultrasound) {
+        responseRecommendationDiv.textContent = result.category;
+        responseRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Arvio:</h3>';
+        rationaleHTML += '<p><strong>Tyroksiinin aikainen Tg:</strong> ' + suppressedTg.toFixed(2) + ' µg/l</p>';
+        if (stimulatedTg !== null) {
+            rationaleHTML += '<p><strong>Stimuloitu Tg:</strong> ' + stimulatedTg.toFixed(2) + ' µg/l</p>';
+        }
+        rationaleHTML += '<p><strong>TgAb:</strong> ' + getTgAbLabel(tgAb) + '</p>';
+        rationaleHTML += '<p><strong>UÄ-löydös:</strong> ' + getUltrasoundLabel(ultrasound) + '</p>';
+
+        rationaleHTML += '<p><strong>Suositus:</strong> ' + result.recommendation + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        responseRationaleDiv.innerHTML = rationaleHTML;
+        responseResultContainer.style.display = 'block';
+        responseResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function getTgAbLabel(value) {
+        const labels = {
+            'negative': 'Negatiivinen',
+            'stable': 'Koholla, stabiili/laskeva',
+            'rising': 'Koholla, nousussa'
+        };
+        return labels[value] || value;
+    }
+
+    function getUltrasoundLabel(value) {
+        const labels = {
+            'normal': 'Normaali',
+            'suspicious': 'Epäilyttävä löydös',
+            'positive': 'Selvä tauti'
+        };
+        return labels[value] || value;
+    }
+
+    // TSH Targets form handling (6.3)
+    const tshForm = document.getElementById('tshForm');
+    const tshResultContainer = document.getElementById('tshResult');
+    const tshRecommendationDiv = document.getElementById('tshRecommendation');
+    const tshRationaleDiv = document.getElementById('tshRationale');
+
+    if (tshForm) {
+        // Toggle visibility of risk vs response fields
+        const responseAssessedRadios = document.querySelectorAll('input[name="responseAssessed"]');
+        responseAssessedRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const riskGroup = document.getElementById('riskCategoryGroup');
+                const responseGroup = document.getElementById('responseStatusGroup');
+                if (this.value === 'yes') {
+                    riskGroup.style.display = 'none';
+                    responseGroup.style.display = 'block';
+                } else {
+                    riskGroup.style.display = 'block';
+                    responseGroup.style.display = 'none';
+                }
+            });
+        });
+
+        tshForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const surgeryType = document.querySelector('input[name="surgeryType"]:checked').value;
+            const responseAssessed = document.querySelector('input[name="responseAssessed"]:checked').value;
+            const riskCategory = document.querySelector('input[name="riskCategory"]:checked');
+            const responseStatus = document.querySelector('input[name="responseStatus"]:checked');
+
+            const result = determineTSHTarget(surgeryType, responseAssessed,
+                riskCategory ? riskCategory.value : null,
+                responseStatus ? responseStatus.value : null);
+            displayTSHResult(result, surgeryType, responseAssessed);
+        });
+
+        tshForm.addEventListener('reset', function() {
+            tshResultContainer.style.display = 'none';
+            document.getElementById('riskCategoryGroup').style.display = 'block';
+            document.getElementById('responseStatusGroup').style.display = 'none';
+        });
+    }
+
+    function determineTSHTarget(surgeryType, responseAssessed, riskCategory, responseStatus) {
+        let target = '';
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        if (surgeryType === 'lobectomy') {
+            target = '0.5-2.0 mU/l';
+            reasoning.push('Lobektomia - aina matalan riskin hoitolinja');
+            reasoning.push('Normaali TSH-tavoite riittää');
+            riskLevel = 'benign';
+        } else if (responseAssessed === 'no') {
+            // Pre-response assessment
+            if (riskCategory === 'high') {
+                target = '<0.1 mU/l';
+                reasoning.push('Korkean riskin potilas - TSH-suppressio tarpeen');
+                reasoning.push('Pidä T3v viitealueella');
+                riskLevel = 'high-risk';
+            } else {
+                target = '0.1-0.5 mU/l';
+                reasoning.push('Matalan/kohtalaisen riskin potilas ennen vastearviota');
+                riskLevel = 'warning';
+            }
+        } else {
+            // Post-response assessment
+            switch (responseStatus) {
+                case 'excellent':
+                    target = '0.5-2.0 mU/l';
+                    reasoning.push('Erinomainen vaste - normaali TSH-tavoite riittää');
+                    riskLevel = 'benign';
+                    break;
+                case 'indeterminate':
+                case 'biochemical':
+                    target = '0.1-0.5 mU/l';
+                    reasoning.push('Epävarma/epätäydellinen vaste - lievä suppressio');
+                    riskLevel = 'warning';
+                    break;
+                case 'structural':
+                    target = '<0.1 mU/l';
+                    reasoning.push('Mitattavaa tautia jäljellä - TSH-suppressio tarpeen');
+                    reasoning.push('Pidä T3v viitealueella');
+                    riskLevel = 'high-risk';
+                    break;
+            }
+        }
+
+        return {
+            target: target,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayTSHResult(result, surgeryType, responseAssessed) {
+        tshRecommendationDiv.textContent = 'TSH-tavoite: ' + result.target;
+        tshRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Suositus:</h3>';
+        rationaleHTML += '<p><strong>Leikkaustyyppi:</strong> ' + (surgeryType === 'lobectomy' ? 'Lobektomia' : 'Totaaliresektio') + '</p>';
+        rationaleHTML += '<p><strong>Vastearvio:</strong> ' + (responseAssessed === 'yes' ? 'Tehty' : 'Ei vielä') + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        rationaleHTML += '<p><strong>Muistettavaa:</strong></p><ul>';
+        rationaleHTML += '<li>Annoksen muutostarpeen arvio 6-8 viikon kuluttua</li>';
+        rationaleHTML += '<li>Suppressiohoito voi altistaa osteoporoosille ja sydän-verisuonitaudeille</li>';
+        rationaleHTML += '</ul>';
+
+        tshRationaleDiv.innerHTML = rationaleHTML;
+        tshResultContainer.style.display = 'block';
+        tshResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Genetic Predisposition form handling (8.1)
+    const geneticForm = document.getElementById('geneticForm');
+    const geneticResultContainer = document.getElementById('geneticResult');
+    const geneticRecommendationDiv = document.getElementById('geneticRecommendation');
+    const geneticRationaleDiv = document.getElementById('geneticRationale');
+
+    if (geneticForm) {
+        geneticForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const affectedRelatives = document.getElementById('affectedRelatives').value;
+            const youngestAgeInput = document.getElementById('youngestAge').value;
+            const youngestAge = youngestAgeInput ? parseInt(youngestAgeInput) : null;
+            const syndromeFeatures = Array.from(document.querySelectorAll('input[name="syndromeFeature"]:checked'))
+                .map(cb => cb.value);
+
+            const result = determineGeneticScreening(affectedRelatives, youngestAge, syndromeFeatures);
+            displayGeneticResult(result, affectedRelatives, youngestAge, syndromeFeatures);
+        });
+
+        geneticForm.addEventListener('reset', function() {
+            geneticResultContainer.style.display = 'none';
+        });
+    }
+
+    function determineGeneticScreening(affectedRelatives, youngestAge, syndromeFeatures) {
+        let recommendation = '';
+        let screeningProtocol = '';
+        let geneticTesting = false;
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        // Check for syndrome features first
+        if (syndromeFeatures.length > 0) {
+            geneticTesting = true;
+            recommendation = 'Geneettinen tutkimus suositeltava';
+            riskLevel = 'high-risk';
+            reasoning.push('Kasvainalttiusoireyhtymän piirteitä todettu');
+            reasoning.push('Konsultoi kliinisen genetiikan yksikköä');
+            screeningProtocol = 'Vuosittainen kilpirauhasen UÄ oireyhtymän kantajille';
+        }
+        // Then check family history
+        else if (affectedRelatives === '3') {
+            recommendation = 'Vuosittainen kilpirauhasen UÄ-seuranta';
+            riskLevel = 'high-risk';
+            reasoning.push('≥3 sairastunutta suvussa - 99% todennäköisyydellä familiaalinen tauti');
+            reasoning.push('Perustuu ATA/NIH-suositukseen');
+
+            if (youngestAge !== null) {
+                const screeningStart = Math.max(10, youngestAge - 10);
+                screeningProtocol = 'Aloitus ' + screeningStart + ' vuoden iässä tai 20 vuoden iässä (kumpi tulee ensin)';
+            } else {
+                screeningProtocol = 'Aloitus 20 vuoden iässä tai 10 vuotta ennen suvun nuorimman sairastumisikää';
+            }
+        } else if (affectedRelatives === '2') {
+            recommendation = 'Kaulan palpaatio, ei rutiini-UÄ-seulontaa';
+            riskLevel = 'warning';
+            reasoning.push('2 sairastunutta suvussa - sporadisen taudin osuus ~50%');
+            reasoning.push('Rutiininomaista UÄ-seulontaa ei suositella');
+            screeningProtocol = 'Kliininen seuranta, UÄ oireiden ilmaantuessa';
+        } else if (affectedRelatives === '1') {
+            recommendation = 'Ei erityistä seulontaa';
+            riskLevel = 'low-risk';
+            reasoning.push('Yksittäinen sairastunut suvussa - ei viitettä familiaaliseen tautiin');
+            screeningProtocol = 'Normaali terveydenhuolto';
+        } else {
+            recommendation = 'Ei erityistä seulontaa';
+            riskLevel = 'benign';
+            reasoning.push('Ei sukurasitusta');
+            screeningProtocol = 'Normaali terveydenhuolto';
+        }
+
+        return {
+            recommendation: recommendation,
+            screeningProtocol: screeningProtocol,
+            geneticTesting: geneticTesting,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayGeneticResult(result, affectedRelatives, youngestAge, syndromeFeatures) {
+        geneticRecommendationDiv.textContent = result.recommendation;
+        geneticRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Seulontasuositus:</h3>';
+        rationaleHTML += '<p><strong>Sairastuneet sukulaiset:</strong> ' + getRelativesLabel(affectedRelatives) + '</p>';
+        if (youngestAge !== null) {
+            rationaleHTML += '<p><strong>Nuorimman sairastumisikä:</strong> ' + youngestAge + ' vuotta</p>';
+        }
+
+        if (result.geneticTesting) {
+            rationaleHTML += '<p><strong>Geneettinen tutkimus:</strong> Suositeltava</p>';
+        }
+
+        rationaleHTML += '<p><strong>Seulontaprotokolla:</strong> ' + result.screeningProtocol + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        if (syndromeFeatures.length > 0) {
+            rationaleHTML += '<p><strong>Oireyhtymäpiirteet:</strong></p><ul>';
+            syndromeFeatures.forEach(feature => {
+                rationaleHTML += '<li>' + getSyndromeLabel(feature) + '</li>';
+            });
+            rationaleHTML += '</ul>';
+        }
+
+        geneticRationaleDiv.innerHTML = rationaleHTML;
+        geneticResultContainer.style.display = 'block';
+        geneticResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function getRelativesLabel(value) {
+        const labels = {
+            '0': 'Ei yhtään',
+            '1': '1 sukulainen',
+            '2': '2 sukulaista',
+            '3': '3 tai enemmän'
+        };
+        return labels[value] || value;
+    }
+
+    function getSyndromeLabel(value) {
+        const labels = {
+            'fap': 'FAP/Gardner (GI-polyypit, osteoomat)',
+            'cowden': 'Cowden (hamartoomat, rintasyöpäalttius)',
+            'carney': 'Carney (endokriinikasvaimet)',
+            'werner': 'Werner (sarkoomat, progeria)',
+            'dicer1': 'DICER1 (blastooma, monikyhmystruuma)'
+        };
+        return labels[value] || value;
+    }
+
+    // Pregnancy form handling (8.2)
+    const pregnancyForm = document.getElementById('pregnancyForm');
+    const pregnancyResultContainer = document.getElementById('pregnancyResult');
+    const pregnancyRecommendationDiv = document.getElementById('pregnancyRecommendation');
+    const pregnancyRationaleDiv = document.getElementById('pregnancyRationale');
+
+    if (pregnancyForm) {
+        // Toggle visibility of conditional fields
+        const scenarioRadios = document.querySelectorAll('input[name="pregnancyScenario"]');
+        scenarioRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const trimesterGroup = document.getElementById('trimesterGroup');
+                const tumorGroup = document.getElementById('tumorFeaturesGroup');
+                const diseaseGroup = document.getElementById('diseaseStatusGroup');
+                const postTreatmentGroup = document.getElementById('postTreatmentGroup');
+
+                trimesterGroup.style.display = 'none';
+                tumorGroup.style.display = 'none';
+                diseaseGroup.style.display = 'none';
+                postTreatmentGroup.style.display = 'none';
+
+                if (this.value === 'newDiagnosis') {
+                    trimesterGroup.style.display = 'block';
+                    tumorGroup.style.display = 'block';
+                } else if (this.value === 'previousTreatment') {
+                    diseaseGroup.style.display = 'block';
+                } else if (this.value === 'planningPregnancy') {
+                    postTreatmentGroup.style.display = 'block';
+                }
+            });
+        });
+
+        pregnancyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const scenario = document.querySelector('input[name="pregnancyScenario"]:checked').value;
+            const trimester = document.querySelector('input[name="trimester"]:checked');
+            const features = Array.from(document.querySelectorAll('input[name="pregnancyFeature"]:checked'))
+                .map(cb => cb.value);
+            const diseaseStatus = document.querySelector('input[name="diseaseStatus"]:checked');
+            const lastTreatment = document.querySelector('input[name="lastTreatment"]:checked');
+
+            const result = determinePregnancyManagement(scenario,
+                trimester ? trimester.value : null,
+                features,
+                diseaseStatus ? diseaseStatus.value : null,
+                lastTreatment ? lastTreatment.value : null);
+            displayPregnancyResult(result, scenario);
+        });
+
+        pregnancyForm.addEventListener('reset', function() {
+            pregnancyResultContainer.style.display = 'none';
+            document.getElementById('trimesterGroup').style.display = 'none';
+            document.getElementById('tumorFeaturesGroup').style.display = 'none';
+            document.getElementById('diseaseStatusGroup').style.display = 'none';
+            document.getElementById('postTreatmentGroup').style.display = 'none';
+        });
+    }
+
+    function determinePregnancyManagement(scenario, trimester, features, diseaseStatus, lastTreatment) {
+        let recommendation = '';
+        let tshTarget = '';
+        let followUp = '';
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        if (scenario === 'newDiagnosis') {
+            const hasHighRiskFeatures = features.includes('symptoms') || features.includes('lymphNodes') ||
+                                       features.includes('growth') || features.includes('invasion');
+
+            if (hasHighRiskFeatures) {
+                if (trimester === 'second') {
+                    recommendation = 'Leikkaushoito suositeltava 2. raskauskolmanneksella';
+                    reasoning.push('Korkean riskin piirteitä todettu');
+                    reasoning.push('2. raskauskolmannes on optimaalinen leikkausajankohta');
+                    riskLevel = 'high-risk';
+                } else if (trimester === 'first') {
+                    recommendation = 'Tiivis seuranta, leikkaus 2. kolmanneksella jos progressio';
+                    reasoning.push('1. kolmanneksella spontaanin keskenmenon riski kohonnut');
+                    reasoning.push('Seuraa UÄ:llä 1. kolmanneksen lopussa');
+                    riskLevel = 'warning';
+                } else {
+                    recommendation = 'Leikkaus synnytyksen jälkeen';
+                    reasoning.push('3. kolmanneksella ennenaikaisen synnytyksen riski');
+                    reasoning.push('Jos tauti pysyy stabiilina, leikkaus synnytyksen jälkeen');
+                    riskLevel = 'warning';
+                }
+                tshTarget = '0.3-2.0 mU/l';
+            } else {
+                recommendation = 'Seuranta, leikkaus synnytyksen jälkeen';
+                reasoning.push('Ei korkean riskin piirteitä');
+                reasoning.push('UÄ-seuranta joka raskauskolmanneksessa');
+                tshTarget = 'Jos TSH >2 mU/l, harkitse levotyroksiinia (tavoite 0.3-2.0 mU/l)';
+                riskLevel = 'low-risk';
+            }
+            followUp = 'UÄ joka raskauskolmanneksessa';
+        } else if (scenario === 'previousTreatment') {
+            switch (diseaseStatus) {
+                case 'cured':
+                    recommendation = 'Normaali raskausseuranta';
+                    tshTarget = '0.5-2.5 mU/l';
+                    followUp = 'Rutiini-Tg/UÄ-seurantaa ei tarvita raskausaikana';
+                    reasoning.push('Tautivapaa potilas - normaali hypotyreosin hoito');
+                    reasoning.push('Raskaus ei lisää uusiutumisriskiä');
+                    riskLevel = 'benign';
+                    break;
+                case 'indeterminate':
+                    recommendation = 'Seuranta raskausaikana';
+                    tshTarget = 'Ennen raskautta asetettu tavoite';
+                    followUp = 'UÄ + Tg raskausaikana';
+                    reasoning.push('Epävarma tilanne - seuranta tarpeen');
+                    riskLevel = 'warning';
+                    break;
+                case 'active':
+                    recommendation = 'Tiivis seuranta, TSH-suppressio';
+                    tshTarget = '<0.1 mU/l';
+                    followUp = 'UÄ + Tg joka raskauskolmanneksessa';
+                    reasoning.push('Aktiivinen tauti - TSH-suppressio läpi raskauden');
+                    reasoning.push('T3v pidettävä viitealueella');
+                    riskLevel = 'high-risk';
+                    break;
+            }
+            reasoning.push('Nosta levotyroksiiniannosta 25-50 µg heti raskauden alettua');
+        } else if (scenario === 'planningPregnancy') {
+            if (lastTreatment === 'rai') {
+                recommendation = 'Odota vähintään 6 kk radiojodihoidosta';
+                reasoning.push('Varoaika vähintään 6 kk, mieluiten 12 kk remission varmistamiseksi');
+                reasoning.push('Miehillä varoaika 3-6 kk');
+                riskLevel = 'warning';
+            } else if (lastTreatment === 'breastfeeding') {
+                recommendation = 'Lopeta imetys 2-3 kk ennen mahdollista RAI:ta';
+                reasoning.push('Radiojodihoito vasta-aiheinen imetyksen aikana');
+                reasoning.push('Imetyksen lopetus kabergoliinilla');
+                riskLevel = 'warning';
+            } else {
+                recommendation = 'Raskaus mahdollinen leikkauksen jälkeen';
+                reasoning.push('Ei erityistä varoaikaa pelkän leikkauksen jälkeen');
+                reasoning.push('Varmista TSH <2.5 mU/l ennen raskautta');
+                riskLevel = 'benign';
+            }
+        }
+
+        return {
+            recommendation: recommendation,
+            tshTarget: tshTarget,
+            followUp: followUp,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayPregnancyResult(result, scenario) {
+        pregnancyRecommendationDiv.textContent = result.recommendation;
+        pregnancyRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Hoitosuositus:</h3>';
+
+        if (result.tshTarget) {
+            rationaleHTML += '<p><strong>TSH-tavoite:</strong> ' + result.tshTarget + '</p>';
+        }
+        if (result.followUp) {
+            rationaleHTML += '<p><strong>Seuranta:</strong> ' + result.followUp + '</p>';
+        }
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        rationaleHTML += '<p><strong>Muistettavaa:</strong></p><ul>';
+        rationaleHTML += '<li>Radiojodihoito on ehdottomasti vasta-aiheinen raskauden aikana</li>';
+        rationaleHTML += '<li>TKI-lääkkeet ovat teratogeenisia</li>';
+        if (scenario !== 'planningPregnancy') {
+            rationaleHTML += '<li>Tyroksiinin tarve lisääntyy 30-50% raskauden aikana</li>';
+        }
+        rationaleHTML += '</ul>';
+
+        pregnancyRationaleDiv.innerHTML = rationaleHTML;
+        pregnancyResultContainer.style.display = 'block';
+        pregnancyResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Thyroglobulin Interpretation form handling (8.3)
+    const tgForm = document.getElementById('tgForm');
+    const tgResultContainer = document.getElementById('tgResult');
+    const tgRecommendationDiv = document.getElementById('tgRecommendation');
+    const tgRationaleDiv = document.getElementById('tgRationale');
+
+    if (tgForm) {
+        tgForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const tgType = document.querySelector('input[name="tgType"]:checked').value;
+            const tgValue = parseFloat(document.getElementById('tgValue').value);
+            const tgAbStatus = document.querySelector('input[name="tgAbStatus"]:checked').value;
+            const tgTrend = document.querySelector('input[name="tgTrend"]:checked').value;
+
+            const result = interpretTg(tgType, tgValue, tgAbStatus, tgTrend);
+            displayTgResult(result, tgType, tgValue, tgAbStatus, tgTrend);
+        });
+
+        tgForm.addEventListener('reset', function() {
+            tgResultContainer.style.display = 'none';
+        });
+    }
+
+    function interpretTg(tgType, tgValue, tgAbStatus, tgTrend) {
+        let interpretation = '';
+        let recommendation = '';
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        // Check for TgAb interference
+        if (tgAbStatus !== 'negative') {
+            reasoning.push('TgAb koholla - Tg-arvo voi olla virheellisen matala');
+            if (tgAbStatus === 'positive-rising') {
+                interpretation = 'Nouseva TgAb - aktiivinen tauti todennäköinen';
+                recommendation = 'Radiojodihoito harkittava, kuvantaminen tarpeen';
+                riskLevel = 'high-risk';
+                reasoning.push('Nouseva TgAb viittaa aktiiviseen kilpirauhassyöpään');
+                reasoning.push('TgAb:n seuranta 3-6 kk välein');
+            }
+        }
+
+        // If TgAb is not rising, interpret based on Tg value
+        if (tgAbStatus !== 'positive-rising') {
+            if (tgType === 'suppressed') {
+                if (tgValue < 0.2) {
+                    interpretation = 'Erinomainen vaste';
+                    recommendation = 'Seuranta, ei uusintahoitoja';
+                    riskLevel = 'benign';
+                    reasoning.push('Suppressoitu Tg <0.2 µg/l - matala uusimisriski');
+                } else if (tgValue <= 1) {
+                    interpretation = 'Epävarma tilanne';
+                    recommendation = 'Tiivis seuranta, kontrolli 6-12 kk';
+                    riskLevel = 'warning';
+                    reasoning.push('Suppressoitu Tg 0.2-1 µg/l');
+                } else {
+                    interpretation = 'Biokemiallinen epätäydellinen vaste';
+                    recommendation = 'Kuvantaminen ja radiojodihoito harkittava';
+                    riskLevel = 'high-risk';
+                    reasoning.push('Suppressoitu Tg >1 µg/l viittaa jäljellä olevaan tautiin');
+                }
+            } else {
+                // Stimulated Tg
+                if (tgValue < 1) {
+                    interpretation = 'Erinomainen vaste';
+                    recommendation = 'Seuranta, ei uusintahoitoja';
+                    riskLevel = 'benign';
+                    reasoning.push('Stimuloitu Tg <1 µg/l - matala uusimisriski');
+                } else if (tgValue <= 10) {
+                    interpretation = 'Epävarma tilanne';
+                    recommendation = 'Kontrolli 6-12 kk, seuraa trendiä';
+                    riskLevel = 'warning';
+                    reasoning.push('Stimuloitu Tg 1-10 µg/l');
+                } else if (tgValue <= 20) {
+                    interpretation = 'Biokemiallinen epätäydellinen vaste';
+                    recommendation = 'Radiojodihoito yleensä perusteltu';
+                    riskLevel = 'high-risk';
+                    reasoning.push('Stimuloitu Tg >10 µg/l viittaa jäljellä olevaan tautiin');
+                } else {
+                    interpretation = 'Korkean riskin tilanne';
+                    recommendation = 'Radiojodihoito ja laaja kuvantaminen';
+                    riskLevel = 'high-risk';
+                    reasoning.push('Stimuloitu Tg >20 µg/l - korkea uusimisriski');
+                }
+            }
+        }
+
+        // Check trend
+        if (tgTrend === 'rising') {
+            if (riskLevel !== 'high-risk') {
+                riskLevel = 'warning';
+            }
+            reasoning.push('Nouseva Tg viittaa korkeaan uusimisriskiin');
+            if (tgValue > 1) {
+                recommendation = 'Kuvantaminen (UÄ, TT/MRI, mahdollisesti PET-TT)';
+            }
+        } else if (tgTrend === 'decreasing') {
+            reasoning.push('Laskeva Tg on hyvä merkki');
+        }
+
+        return {
+            interpretation: interpretation,
+            recommendation: recommendation,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayTgResult(result, tgType, tgValue, tgAbStatus, tgTrend) {
+        tgRecommendationDiv.textContent = result.interpretation;
+        tgRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Tulkinta:</h3>';
+        rationaleHTML += '<p><strong>Mittaustyyppi:</strong> ' + (tgType === 'suppressed' ? 'Suppressoitu' : 'Stimuloitu') + '</p>';
+        rationaleHTML += '<p><strong>Tg-arvo:</strong> ' + tgValue.toFixed(2) + ' µg/l</p>';
+        rationaleHTML += '<p><strong>TgAb:</strong> ' + getTgAbStatusLabel(tgAbStatus) + '</p>';
+        rationaleHTML += '<p><strong>Trendi:</strong> ' + getTgTrendLabel(tgTrend) + '</p>';
+
+        rationaleHTML += '<p><strong>Suositus:</strong> ' + result.recommendation + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        if (result.riskLevel === 'high-risk' && tgValue > 1) {
+            rationaleHTML += '<p><strong>Kohonneen Tg:n selvittely:</strong></p><ol>';
+            rationaleHTML += '<li>Kaulan ultraäänitutkimus</li>';
+            rationaleHTML += '<li>Kaulan MRI tai TT</li>';
+            if (tgValue > 10) {
+                rationaleHTML += '<li>PET-TT (erityisesti Tg >10 µg/l)</li>';
+            }
+            rationaleHTML += '<li>Koko kehon gammakuvaus diagnostisella radiojodiannoksella</li>';
+            rationaleHTML += '</ol>';
+        }
+
+        tgRationaleDiv.innerHTML = rationaleHTML;
+        tgResultContainer.style.display = 'block';
+        tgResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function getTgAbStatusLabel(value) {
+        const labels = {
+            'negative': 'Negatiivinen',
+            'positive-stable': 'Koholla, stabiili/laskeva',
+            'positive-rising': 'Koholla, nousussa'
+        };
+        return labels[value] || value;
+    }
+
+    function getTgTrendLabel(value) {
+        const labels = {
+            'decreasing': 'Laskeva',
+            'stable': 'Stabiili',
+            'rising': 'Nousussa',
+            'first': 'Ensimmäinen mittaus'
+        };
+        return labels[value] || value;
+    }
+
+    // Repeat Surgery form handling (7.1)
+    const repeatSurgeryForm = document.getElementById('repeatSurgeryForm');
+    const repeatSurgeryResultContainer = document.getElementById('repeatSurgeryResult');
+    const repeatSurgeryRecommendationDiv = document.getElementById('repeatSurgeryRecommendation');
+    const repeatSurgeryRationaleDiv = document.getElementById('repeatSurgeryRationale');
+
+    if (repeatSurgeryForm) {
+        repeatSurgeryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const locations = Array.from(document.querySelectorAll('input[name="recurrenceLocation"]:checked'))
+                .map(cb => cb.value);
+            const nodeSize = parseInt(document.getElementById('nodeSize').value);
+            const previousSurgery = document.querySelector('input[name="previousSurgery"]:checked').value;
+            const fnacConfirmed = document.querySelector('input[name="fnacConfirmed"]:checked').value;
+
+            const result = determineRepeatSurgery(locations, nodeSize, previousSurgery, fnacConfirmed);
+            displayRepeatSurgeryResult(result, locations, nodeSize);
+        });
+
+        repeatSurgeryForm.addEventListener('reset', function() {
+            repeatSurgeryResultContainer.style.display = 'none';
+        });
+    }
+
+    function determineRepeatSurgery(locations, nodeSize, previousSurgery, fnacConfirmed) {
+        let recommendation = '';
+        let surgeryType = '';
+        let reasoning = [];
+        let riskLevel = 'warning';
+
+        const isCentral = locations.includes('central');
+        const isLateral = locations.includes('lateral');
+        const isThyroidBed = locations.includes('thyroidBed');
+
+        // Check if surveillance is appropriate based on size
+        const centralThreshold = 8;
+        const lateralThreshold = 10;
+
+        if (fnacConfirmed === 'no') {
+            recommendation = 'Tee ensin ONB-varmistus';
+            surgeryType = 'Diagnoosi ensin';
+            reasoning.push('ONB-varmistus tarvitaan ennen leikkauspäätöstä');
+            reasoning.push('Kaulan MRI/TT ennen toimenpiteitä');
+            riskLevel = 'warning';
+        } else if (fnacConfirmed === 'suspicious') {
+            recommendation = 'Harkitse uusinta-ONB tai leikkausta';
+            surgeryType = 'Diagnoosi/leikkaus';
+            reasoning.push('Epävarma ONB-tulos - harkitse uusintaa');
+            reasoning.push('Jos kliininen epäily vahva, leikkaus perusteltua');
+            riskLevel = 'warning';
+        } else {
+            // FNAC confirmed malignant
+            if (isCentral && nodeSize < centralThreshold && !isLateral && !isThyroidBed) {
+                recommendation = 'Seuranta mahdollinen';
+                surgeryType = 'UÄ-seuranta 3-6 kk välein';
+                reasoning.push('Sentraalialueen pieni (<8 mm) metastaasi');
+                reasoning.push('Aktiivinen seuranta mahdollinen valituilla potilailla');
+                riskLevel = 'low-risk';
+            } else if (isLateral && nodeSize < lateralThreshold && !isCentral && !isThyroidBed) {
+                recommendation = 'Seuranta mahdollinen';
+                surgeryType = 'UÄ-seuranta 3-6 kk välein';
+                reasoning.push('Lateraalialueen pieni (<10 mm) metastaasi');
+                reasoning.push('Aktiivinen seuranta mahdollinen valituilla potilailla');
+                riskLevel = 'low-risk';
+            } else {
+                recommendation = 'Leikkaushoito suositeltava';
+                riskLevel = 'high-risk';
+
+                if (isCentral) {
+                    if (previousSurgery === 'yes') {
+                        surgeryType = 'Leesion poisto (berry picking)';
+                        reasoning.push('Sentraalialue aiemmin leikattu - kohdennettu poisto');
+                    } else {
+                        surgeryType = 'Tason VI tyhjennys';
+                        reasoning.push('Sentraalialueen systemaattinen tyhjennys');
+                    }
+                    reasoning.push('Neuromonitorointi aiheellista');
+                }
+
+                if (isLateral) {
+                    if (previousSurgery === 'yes') {
+                        surgeryType = (surgeryType ? surgeryType + ' + ' : '') + 'Kohdennettu lateraalinen poisto';
+                        reasoning.push('Lateraalialue aiemmin leikattu - kohdennettu poisto');
+                    } else {
+                        surgeryType = (surgeryType ? surgeryType + ' + ' : '') + 'Kauladissektio IIa-III-IV-Vb';
+                        reasoning.push('Lateraalialueen systemaattinen dissektio');
+                    }
+                }
+
+                if (isThyroidBed) {
+                    surgeryType = (surgeryType ? surgeryType + ' + ' : '') + 'Kilpirauhasalueen revisio';
+                    reasoning.push('Kilpirauhasen leikkausalueen uusiutuma');
+                }
+            }
+        }
+
+        reasoning.push('Hoito keskitettävä yliopistosairaalaan');
+
+        return {
+            recommendation: recommendation,
+            surgeryType: surgeryType,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayRepeatSurgeryResult(result, locations, nodeSize) {
+        repeatSurgeryRecommendationDiv.textContent = result.recommendation;
+        repeatSurgeryRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Hoitosuositus:</h3>';
+        rationaleHTML += '<p><strong>Solmukkeen koko:</strong> ' + nodeSize + ' mm</p>';
+        rationaleHTML += '<p><strong>Toimenpide:</strong> ' + result.surgeryType + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        repeatSurgeryRationaleDiv.innerHTML = rationaleHTML;
+        repeatSurgeryResultContainer.style.display = 'block';
+        repeatSurgeryResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Repeat RAI form handling (7.2)
+    const repeatRaiForm = document.getElementById('repeatRaiForm');
+    const repeatRaiResultContainer = document.getElementById('repeatRaiResult');
+    const repeatRaiRecommendationDiv = document.getElementById('repeatRaiRecommendation');
+    const repeatRaiRationaleDiv = document.getElementById('repeatRaiRationale');
+
+    if (repeatRaiForm) {
+        repeatRaiForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const stimTg = parseFloat(document.getElementById('stimTgLevel').value);
+            const tgTrend = document.querySelector('input[name="tgTrendRai"]:checked').value;
+            const tgAbStatus = document.querySelector('input[name="tgAbRai"]:checked').value;
+            const metastases = document.querySelector('input[name="metastases"]:checked').value;
+            const iodineAvid = document.querySelector('input[name="iodineAvid"]:checked').value;
+
+            const result = determineRepeatRai(stimTg, tgTrend, tgAbStatus, metastases, iodineAvid);
+            displayRepeatRaiResult(result, stimTg, metastases);
+        });
+
+        repeatRaiForm.addEventListener('reset', function() {
+            repeatRaiResultContainer.style.display = 'none';
+        });
+    }
+
+    function determineRepeatRai(stimTg, tgTrend, tgAbStatus, metastases, iodineAvid) {
+        let recommendation = '';
+        let dose = '';
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        // Check if RAI-refractory
+        if (iodineAvid === 'no') {
+            recommendation = 'Radiojodihoito ei ole indisoitu';
+            dose = 'Ei RAI:ta';
+            reasoning.push('Radiojodirefraktaari tauti - pesäkkeet eivät kerää radiojodia');
+            reasoning.push('Harkitse ulkoista sädehoitoa tai systeemistä lääkehoitoa');
+            riskLevel = 'warning';
+        } else {
+            // Check for distant metastases
+            if (metastases === 'lungMicro') {
+                recommendation = 'RAI-sarjahoito suositeltava';
+                dose = '3.7 GBq × 3 (4-6 kk välein)';
+                reasoning.push('Mikronodulaarinen keuhkometastasointi');
+                reasoning.push('Kuratiivinen hoitotulos mahdollinen');
+                riskLevel = 'high-risk';
+            } else if (metastases === 'lungMacro' || metastases === 'bone' || metastases === 'other') {
+                recommendation = 'RAI-sarjahoito + mahdollisesti paikallishoito';
+                dose = '3.7 GBq × 3 (4-6 kk välein)';
+                reasoning.push('Etäpesäkkeet todettu - tarvitaan monimodaalinen hoito');
+                if (metastases === 'bone') {
+                    reasoning.push('Luustometastaasit vaativat aina myös ulkoista sädehoitoa');
+                }
+                riskLevel = 'high-risk';
+            } else {
+                // No distant metastases - base on Tg levels
+                if (stimTg >= 10) {
+                    recommendation = 'Radiojodihoito suositeltava';
+                    dose = '3.7 GBq';
+                    reasoning.push('Biokemiallinen epätäydellinen vaste (stim. Tg ≥10 µg/l)');
+                    riskLevel = 'high-risk';
+                } else if (stimTg >= 1 && stimTg < 10) {
+                    if (tgTrend === 'rising') {
+                        recommendation = 'Radiojodihoito harkittava';
+                        dose = '3.7 GBq';
+                        reasoning.push('Epävarma tilanne nousevalla Tg-trendillä');
+                        riskLevel = 'warning';
+                    } else {
+                        recommendation = 'Kontrolli 6-12 kk';
+                        dose = 'Ei RAI:ta vielä';
+                        reasoning.push('Epävarma tilanne (stim. Tg 1-10 µg/l)');
+                        reasoning.push('Seuranta tiivis, RAI jos selvä nousu');
+                        riskLevel = 'warning';
+                    }
+                } else {
+                    recommendation = 'Ei RAI-tarvetta';
+                    dose = 'Seuranta riittää';
+                    reasoning.push('Matala Tg-taso (stim. Tg <1 µg/l)');
+                    riskLevel = 'benign';
+                }
+            }
+
+            // Check TgAb
+            if (tgAbStatus === 'rising') {
+                recommendation = 'Radiojodihoito suositeltava';
+                dose = '3.7 GBq';
+                reasoning.push('Nouseva TgAb viittaa aktiiviseen syöpään');
+                riskLevel = 'high-risk';
+            }
+        }
+
+        return {
+            recommendation: recommendation,
+            dose: dose,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayRepeatRaiResult(result, stimTg, metastases) {
+        repeatRaiRecommendationDiv.textContent = result.recommendation;
+        repeatRaiRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Hoitosuositus:</h3>';
+        rationaleHTML += '<p><strong>Stimuloitu Tg:</strong> ' + stimTg.toFixed(1) + ' µg/l</p>';
+        rationaleHTML += '<p><strong>RAI-annos:</strong> ' + result.dose + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        if (result.riskLevel === 'high-risk') {
+            rationaleHTML += '<p><strong>Muistettavaa:</strong></p><ul>';
+            rationaleHTML += '<li>Vähäjodinen ruokavalio 2 viikkoa ennen hoitoa</li>';
+            rationaleHTML += '<li>TSH-stimulaatio rhTSH:lla tai tyroksiinivieroituksella</li>';
+            rationaleHTML += '<li>33 GBq kumulatiivista turvallisuusrajaa voidaan ylittää yksilöllisesti</li>';
+            rationaleHTML += '</ul>';
+        }
+
+        repeatRaiRationaleDiv.innerHTML = rationaleHTML;
+        repeatRaiResultContainer.style.display = 'block';
+        repeatRaiResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // External Radiation form handling (7.3)
+    const radiationForm = document.getElementById('radiationForm');
+    const radiationResultContainer = document.getElementById('radiationResult');
+    const radiationRecommendationDiv = document.getElementById('radiationRecommendation');
+    const radiationRationaleDiv = document.getElementById('radiationRationale');
+
+    if (radiationForm) {
+        radiationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const target = document.querySelector('input[name="radiationTarget"]:checked').value;
+            const lesionCount = document.querySelector('input[name="lesionCount"]:checked').value;
+            const raiResponse = document.querySelector('input[name="raiResponse"]:checked').value;
+            const surgeryPossible = document.querySelector('input[name="surgeryPossible"]:checked').value;
+            const symptoms = Array.from(document.querySelectorAll('input[name="symptoms"]:checked'))
+                .map(cb => cb.value);
+
+            const result = determineRadiation(target, lesionCount, raiResponse, surgeryPossible, symptoms);
+            displayRadiationResult(result, target);
+        });
+
+        radiationForm.addEventListener('reset', function() {
+            radiationResultContainer.style.display = 'none';
+        });
+    }
+
+    function determineRadiation(target, lesionCount, raiResponse, surgeryPossible, symptoms) {
+        let recommendation = '';
+        let technique = '';
+        let reasoning = [];
+        let riskLevel = 'warning';
+
+        const isOligomet = lesionCount === 'single' || lesionCount === 'oligo';
+        const hasSymptoms = symptoms.length > 0;
+
+        if (surgeryPossible === 'yes' && (lesionCount === 'single' || target === 'neck')) {
+            recommendation = 'Harkitse ensin leikkaushoitoa';
+            technique = 'Kirurgia ensisijainen';
+            reasoning.push('Leikkauskelpoiset leesiot - kirurgia ensisijainen');
+            riskLevel = 'low-risk';
+        } else if (raiResponse === 'avid' && !hasSymptoms && target !== 'bone') {
+            recommendation = 'Harkitse ensin radiojodihoitoa';
+            technique = 'RAI ensisijainen';
+            reasoning.push('Radiojodia keräävä tauti - RAI ensisijainen hoitomuoto');
+            riskLevel = 'low-risk';
+        } else {
+            // Radiation indicated
+            if (target === 'neck') {
+                recommendation = 'Ulkoinen sädehoito aiheellinen';
+                technique = 'IMRT 54-70 Gy';
+                reasoning.push('Kaulan sädehoito indisoitu');
+                if (raiResponse === 'refractory') {
+                    reasoning.push('Radiojodirefraktaari kaulatauti');
+                }
+                riskLevel = 'high-risk';
+            } else if (target === 'brain') {
+                if (lesionCount === 'multiple') {
+                    recommendation = 'Kokoaivojen sädehoito';
+                    technique = 'WBRT tai SRS + WBRT';
+                    reasoning.push('>4 aivometastaasia - kokoaivojen hoito harkittava');
+                } else {
+                    recommendation = 'Stereotaktinen sädehoito';
+                    technique = 'SRS/SRT';
+                    reasoning.push('≤4 aivometastaasia - stereotaktinen hoito suositeltava');
+                }
+                riskLevel = 'high-risk';
+            } else if (target === 'bone') {
+                recommendation = 'Ulkoinen sädehoito + RAI (jos kerää)';
+                technique = 'EBRT 30-40 Gy + RAI';
+                reasoning.push('Luustometastaasit vaativat AINA ulkoista sädehoitoa RAI:n lisäksi');
+                if (symptoms.includes('fracture')) {
+                    reasoning.push('Murtumariski kantavassa luussa');
+                }
+                riskLevel = 'high-risk';
+            } else if (isOligomet && raiResponse === 'refractory') {
+                recommendation = 'Stereotaktinen sädehoito';
+                technique = 'SBRT/SABR';
+                reasoning.push('Oligometastaattinen radiojodirefraktaari tauti');
+                reasoning.push('Voi viivästyttää systeemisen lääkehoidon tarvetta');
+                riskLevel = 'warning';
+            } else {
+                recommendation = 'Palliatiivinen sädehoito harkittava';
+                technique = 'Yksilöllinen annos';
+                reasoning.push('Oireenmukaiseen hoitoon');
+                if (hasSymptoms) {
+                    reasoning.push('Oireita aiheuttavat pesäkkeet');
+                }
+                riskLevel = 'warning';
+            }
+        }
+
+        return {
+            recommendation: recommendation,
+            technique: technique,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displayRadiationResult(result, target) {
+        radiationRecommendationDiv.textContent = result.recommendation;
+        radiationRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Hoitosuositus:</h3>';
+        rationaleHTML += '<p><strong>Tekniikka:</strong> ' + result.technique + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        radiationRationaleDiv.innerHTML = rationaleHTML;
+        radiationResultContainer.style.display = 'block';
+        radiationResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Systemic Therapy form handling (7.4)
+    const systemicForm = document.getElementById('systemicForm');
+    const systemicResultContainer = document.getElementById('systemicResult');
+    const systemicRecommendationDiv = document.getElementById('systemicRecommendation');
+    const systemicRationaleDiv = document.getElementById('systemicRationale');
+
+    if (systemicForm) {
+        systemicForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const raiStatus = document.querySelector('input[name="raiStatus"]:checked').value;
+            const progression = document.querySelector('input[name="progression"]:checked').value;
+            const localControl = document.querySelector('input[name="localControl"]:checked').value;
+            const burden = Array.from(document.querySelectorAll('input[name="burden"]:checked'))
+                .map(cb => cb.value);
+            const molecular = Array.from(document.querySelectorAll('input[name="molecular"]:checked'))
+                .map(cb => cb.value);
+
+            const result = determineSystemicTherapy(raiStatus, progression, localControl, burden, molecular);
+            displaySystemicResult(result, molecular);
+        });
+
+        systemicForm.addEventListener('reset', function() {
+            systemicResultContainer.style.display = 'none';
+        });
+    }
+
+    function determineSystemicTherapy(raiStatus, progression, localControl, burden, molecular) {
+        let recommendation = '';
+        let drug = '';
+        let reasoning = [];
+        let riskLevel = 'low-risk';
+
+        const hasBurden = burden.length > 0;
+        const isSymptomatic = burden.includes('symptomatic');
+        const isSignificant = burden.includes('significant');
+        const isThreatening = burden.includes('threatening');
+
+        if (raiStatus === 'responsive') {
+            recommendation = 'Jatka radiojodihoitoa';
+            drug = 'RAI ensisijainen';
+            reasoning.push('Radiojodia keräävä tauti - jatka RAI-hoitoa');
+            riskLevel = 'benign';
+        } else if (localControl === 'yes') {
+            recommendation = 'Paikallishoito ensisijainen';
+            drug = 'Kirurgia/sädehoito';
+            reasoning.push('Tauti hallittavissa paikallishoidolla');
+            riskLevel = 'low-risk';
+        } else if (progression === 'stable' && !hasBurden) {
+            recommendation = 'Aktiivinen seuranta';
+            drug = 'Ei lääkehoitoa';
+            reasoning.push('Stabiili tauti ilman oireita tai merkittävää tautitaakkaa');
+            reasoning.push('Pelkkä Tg-nousu EI riitä TKI-indikaatioksi');
+            riskLevel = 'benign';
+        } else if (progression === 'slow' && !isSymptomatic && !isThreatening) {
+            recommendation = 'Seuranta, harkitse lääkehoitoa';
+            drug = 'Ei vielä';
+            reasoning.push('Hidas progressio - seuranta mahdollinen');
+            reasoning.push('Aloita lääkehoito jos progressio nopeutuu tai oireet ilmaantuvat');
+            riskLevel = 'warning';
+        } else {
+            // TKI indicated
+            recommendation = 'Systeeminen lääkehoito indisoitu';
+            riskLevel = 'high-risk';
+
+            if (molecular.includes('ntrk')) {
+                drug = 'Larotrektinibi tai Entrektinibi';
+                reasoning.push('NTRK-fuusiopositiivinen kasvain');
+                reasoning.push('Kohdennettu hoito ensisijainen');
+            } else if (molecular.includes('ret')) {
+                drug = 'Selperkatinibi';
+                reasoning.push('RET-fuusiopositiivinen kasvain');
+                reasoning.push('Kohdennettu hoito ensisijainen');
+            } else {
+                drug = 'Lenvatinibi (24 mg × 1) tai Sorafenibi (400 mg × 2)';
+                reasoning.push('Ensilinjan TKI-hoito');
+            }
+
+            reasoning.push('Radiojodirefraktaari, etenevä tauti');
+            if (isSymptomatic) reasoning.push('Oireinen potilas');
+            if (isSignificant) reasoning.push('Merkittävä tautitaakka');
+            if (isThreatening) reasoning.push('Henkeä uhkaava sijainti');
+        }
+
+        return {
+            recommendation: recommendation,
+            drug: drug,
+            reasoning: reasoning,
+            riskLevel: riskLevel
+        };
+    }
+
+    function displaySystemicResult(result, molecular) {
+        systemicRecommendationDiv.textContent = result.recommendation;
+        systemicRecommendationDiv.className = 'recommendation ' + result.riskLevel;
+
+        let rationaleHTML = '<h3>Hoitosuositus:</h3>';
+        rationaleHTML += '<p><strong>Lääke:</strong> ' + result.drug + '</p>';
+
+        rationaleHTML += '<p><strong>Perustelut:</strong></p><ul>';
+        result.reasoning.forEach(reason => {
+            rationaleHTML += '<li>' + reason + '</li>';
+        });
+        rationaleHTML += '</ul>';
+
+        if (result.riskLevel === 'high-risk') {
+            rationaleHTML += '<p><strong>Seuranta TKI-hoidon aikana:</strong></p><ul>';
+            rationaleHTML += '<li>Verenpaine, laboratoriokokeet, ihohaitat</li>';
+            rationaleHTML += '<li>Annosta joudutaan usein vähentämään</li>';
+            rationaleHTML += '<li>Tyroksiinin tarve voi kasvaa</li>';
+            rationaleHTML += '</ul>';
+
+            if (molecular.length === 0) {
+                rationaleHTML += '<p><strong>Harkitse molekyylipatologista tutkimusta:</strong> NTRK, RET, BRAF</p>';
+            }
+        }
+
+        systemicRationaleDiv.innerHTML = rationaleHTML;
+        systemicResultContainer.style.display = 'block';
+        systemicResultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 });
